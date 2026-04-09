@@ -1,49 +1,313 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>NEON-CORE: FINAL STABLE</title>
-    <style>
-        body { background: #050505; color: #00f3ff; font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
-        #nav { width: 100px; background: #0d0d0d; border-right: 2px solid #00f3ff; display: flex; flex-direction: column; align-items: center; padding-top: 20px; flex-shrink: 0; }
-        .nav-btn { width: 75px; height: 75px; border: 2px solid #00f3ff; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #00f3ff; background: #000; }
-        .nav-btn.active { background: #00f3ff; color: #000; box-shadow: 0 0 15px #00f3ff; }
-        #main { flex: 1; padding: 30px; overflow-y: auto; position: relative; z-index: 10; }
-        .box { background: #111; border: 1px solid #333; padding: 20px; margin-bottom: 20px; border-left: 8px solid #ff00ff; }
-        input, select, button { background: #000; border: 1px solid #00f3ff; color: #00f3ff; padding: 12px; margin: 5px; font-family: inherit; font-size: 16px; }
-        button { cursor: pointer; font-weight: bold; min-width: 100px; }
-        button:hover { background: #00f3ff; color: #000; }
-        #list { margin-top: 30px; }
-        .task-item { background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-left: 4px solid #00f3ff; display: flex; justify-content: space-between; }
-        .update-btn { background: #ff00ff !important; color: #000 !important; font-size: 20px !important; width: 100%; padding: 20px !important; margin-top: 20px; border: none !important; }
-    </style>
+<meta charset="UTF-8">
+<title>NEON-CORE: FULL SPEC</title>
+
+<style>
+body {
+    background:#050505;
+    color:#00f3ff;
+    margin:0;
+    display:flex;
+    height:100vh;
+    font-family:monospace;
+}
+
+/* GRID */
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:
+    linear-gradient(#00f3ff22 1px,transparent 1px),
+    linear-gradient(90deg,#00f3ff22 1px,transparent 1px);
+    background-size:40px 40px;
+    z-index:0;
+}
+
+#nav{
+    width:100px;
+    background:#0d0d0d;
+    border-right:2px solid #00f3ff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding-top:20px;
+}
+
+.nav-btn{
+    width:75px;height:75px;
+    border:2px solid #00f3ff;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+.nav-btn.active{
+    background:#00f3ff;
+    color:#000;
+    box-shadow:0 0 20px #00f3ff;
+}
+
+#main{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+    position:relative;
+    z-index:10;
+}
+
+.box{
+    background:#111;
+    border-left:5px solid #ff00ff;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+input,select,button{
+    background:#000;
+    color:#00f3ff;
+    border:1px solid #00f3ff;
+    padding:8px;
+}
+
+button:hover{
+    background:#00f3ff;
+    color:#000;
+}
+
+.task{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    margin:5px 0;
+    border-left:3px solid #00f3ff;
+}
+
+.archive{
+    opacity:0.6;
+}
+
+/* アラーム */
+.flash{
+    animation:flash 0.3s infinite;
+}
+@keyframes flash{
+    0%{background:#050505;}
+    50%{background:#ff00ff22;}
+}
+</style>
 </head>
+
 <body>
-    <div id="nav">
-        <div class="nav-btn active" id="nb-t" onclick="sw('t')">TASK</div>
-        <div class="nav-btn" id="nb-s" onclick="sw('s')">SYS</div>
-    </div>
-    <div id="main">
-        <div id="sc-t" class="screen active">
-            <h1>TASK TERMINAL</h1>
-            <div class="box">
-                <input type="text" id="tit" placeholder="タスク内容を入力..." style="width: 40%;">
-                <select id="gen">
-                    <option value="Work">Work</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Hobby">Hobby</option>
-                </select>
-                <input type="date" id="dat">
-                <button onclick="addT()">PUSH (追加)</button>
-            </div>
-            <div id="list"></div>
-        </div>
-        <div id="sc-s" class="screen" style="display:none;">
-            <h1>SYSTEM CONTROL</h1>
-            <div class="box">
-                <h3>CORE UPDATE</h3>
-                <textarea id="up-code" style="width: 100%; height: 200px; background:#000; color:#0f0;" placeholder="ここに新しいHTMLを貼り付け"></textarea>
-                <button class="update-btn" onclick="up()">システム更新を実行</button>
-            </div>
-        </div>
-    </div>
+
+<div id="nav">
+    <div class="nav-btn active" onclick="sw('t')">TASK</div>
+    <div class="nav-btn" onclick="sw('s')">SYS</div>
+</div>
+
+<div id="main">
+
+<div id="sc-t">
+<h2>TASK TERMINAL</h2>
+
+<div class="box">
+<input id="title" placeholder="task">
+<select id="mode">
+<option value="once">単発</option>
+<option value="daily">毎日</option>
+<option value="custom">定期</option>
+</select>
+
+<select id="genre"></select>
+
+<input type="date" id="date">
+<button onclick="add()">ADD</button>
+</div>
+
+<div class="box">
+<h3>ACTIVE</h3>
+<div id="active"></div>
+</div>
+
+<div class="box">
+<h3>ARCHIVE</h3>
+<div id="archive"></div>
+</div>
+
+</div>
+
+<div id="sc-s" style="display:none">
+<h2>SYSTEM</h2>
+
+<div class="box">
+アラーム時間:
+<input type="time" id="alarmTime">
+<button onclick="saveAlarm()">SAVE</button>
+</div>
+
+<div class="box">
+<textarea id="code" style="width:100%;height:200px;"></textarea>
+<button onclick="update()">UPDATE</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ========= DB ========= */
+
+let DB = JSON.parse(localStorage.getItem("NEON_DB")) || {
+tasks:[],
+archive:[],
+genres:["Work","Personal","Hobby"],
+alarm:"20:00"
+};
+
+function save(){ localStorage.setItem("NEON_DB",JSON.stringify(DB)); }
+
+/* ========= UI ========= */
+
+function sw(s){
+document.getElementById("sc-t").style.display = s==="t"?"block":"none";
+document.getElementById("sc-s").style.display = s==="s"?"block":"none";
+}
+
+/* ========= TASK ========= */
+
+function add(){
+let t = document.getElementById("title").value;
+if(!t) return;
+
+DB.tasks.push({
+id:Date.now(),
+title:t,
+genre:document.getElementById("genre").value,
+mode:document.getElementById("mode").value,
+date:document.getElementById("date").value
+});
+
+document.getElementById("title").value="";
+save();
+render();
+}
+
+function done(id){
+let t = DB.tasks.find(x=>x.id===id);
+DB.tasks = DB.tasks.filter(x=>x.id!==id);
+DB.archive.push(t);
+save();
+render();
+flash();
+}
+
+function copy(id){
+let t = DB.archive.find(x=>x.id===id);
+DB.tasks.push({...t,id:Date.now()});
+save();
+render();
+}
+
+/* ========= RENDER ========= */
+
+function render(){
+
+/* genre */
+let g = document.getElementById("genre");
+g.innerHTML="";
+DB.genres.forEach(x=>{
+let o=document.createElement("option");
+o.value=x;o.text=x;
+g.appendChild(o);
+});
+
+/* active */
+let a=document.getElementById("active");
+a.innerHTML="";
+DB.tasks.forEach(t=>{
+a.innerHTML+=`
+<div class="task">
+<div>
+[${t.genre}] ${t.title}
+(${t.mode})
+</div>
+<div>
+<button onclick="done(${t.id})">✔</button>
+</div>
+</div>`;
+});
+
+/* archive */
+let ar=document.getElementById("archive");
+ar.innerHTML="";
+DB.archive.forEach(t=>{
+ar.innerHTML+=`
+<div class="task archive">
+<div>[${t.genre}] ${t.title}</div>
+<div>
+<button onclick="copy(${t.id})">COPY</button>
+</div>
+</div>`;
+});
+
+/* alarm */
+document.getElementById("alarmTime").value = DB.alarm;
+}
+
+/* ========= ALARM ========= */
+
+function checkAlarm(){
+let now=new Date();
+let t=now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
+
+if(t===DB.alarm){
+flash();
+notify();
+}
+}
+
+setInterval(checkAlarm,10000);
+
+function flash(){
+document.body.classList.add("flash");
+setTimeout(()=>document.body.classList.remove("flash"),3000);
+}
+
+function notify(){
+if(Notification.permission==="granted"){
+new Notification("TASK ALERT");
+}else{
+Notification.requestPermission();
+}
+}
+
+function saveAlarm(){
+DB.alarm=document.getElementById("alarmTime").value;
+save();
+}
+
+/* ========= UPDATE ========= */
+
+function update(){
+let c=document.getElementById("code").value;
+if(c.length>50){
+document.open();
+document.write(c);
+document.close();
+}
+}
+
+/* ========= INIT ========= */
+
+render();
+
+</script>
+
+</body>
+</html>
