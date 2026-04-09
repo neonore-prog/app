@@ -2,89 +2,141 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>NEON-CORE SETUP</title>
+    <title>NEON-CORE FIX-01</title>
     <style>
-        /* 迷わないための超シンプル設計 */
-        body { background: #000; color: #0f0; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .menu-container { display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; }
+        /* 装飾を最低限にし、確実に「見える」ことを優先 */
+        body { background: #000; color: #0f0; font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
         
-        /* ボタンを巨大にして絶対にわかるようにする */
-        .big-nav-btn { 
-            padding: 30px 50px; font-size: 24px; font-weight: bold;
-            background: #000; color: #0f0; border: 4px solid #0f0; cursor: pointer;
+        /* 左側のメニュー（絶対に隠れないように固定） */
+        #nav { 
+            width: 120px; 
+            background: #111; 
+            border-right: 2px solid #0f0; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 10px;
+            flex-shrink: 0;
         }
-        .big-nav-btn:hover { background: #0f0; color: #000; }
-        .big-nav-btn.active { background: #0f0; color: #000; box-shadow: 0 0 30px #0f0; }
 
-        .screen { display: none; max-width: 800px; margin: 0 auto; border: 2px solid #555; padding: 20px; }
+        .nav-btn { 
+            background: #000; 
+            color: #0f0; 
+            border: 1px solid #0f0; 
+            padding: 15px 5px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .nav-btn:active { background: #0f0; color: #000; }
+
+        /* 右側のメイン画面 */
+        #content { flex: 1; padding: 20px; overflow-y: auto; }
+        .screen { display: none; }
         .screen.active { display: block; }
+
+        .box { border: 1px solid #0f0; padding: 15px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 200px; background: #111; color: #0f0; border: 1px solid #0f0; }
+        .update-trigger { background: #f0f; color: #000; width: 100%; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border: none; }
         
-        textarea { width: 90%; height: 200px; background: #111; color: #f0f; border: 2px solid #f0f; font-size: 16px; margin: 10px 0; }
-        .update-execute-btn { background: #f0f; color: #000; padding: 20px; font-size: 20px; font-weight: bold; border: none; width: 90%; cursor: pointer; }
+        input, select, button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>NEON-CORE 管理パネル</h1>
-
-    <div class="menu-container">
-        <button class="big-nav-btn active" id="btn-t" onclick="tab('task')">1. タスクを使う</button>
-        <button class="big-nav-btn" id="btn-s" onclick="tab('sys')">2. システムを更新する</button>
+    <div id="nav">
+        <div class="nav-btn" onclick="show('task')">タスク管理</div>
+        <div class="nav-btn" onclick="show('sys')">システム更新</div>
     </div>
 
-    <hr style="border:1px solid #333; margin: 40px;">
+    <div id="content">
+        <div id="task" class="screen active">
+            <h1>TASK TERMINAL</h1>
+            <div class="box">
+                <input type="text" id="t-title" placeholder="タスク名">
+                <select id="t-genre"></select>
+                <input type="date" id="t-date">
+                <input type="time" id="t-time" value="20:00">
+                <button onclick="addTask()">登録</button>
+            </div>
+            <div id="task-list"></div>
+        </div>
 
-    <div id="task" class="screen active">
-        <h2>タスク管理画面</h2>
-        <input type="text" id="in-title" placeholder="やることを入力" style="padding:15px; width:60%;">
-        <button onclick="addTask()" style="padding:15px;">追加</button>
-        <div id="list" style="margin-top:20px; text-align:left;"></div>
-    </div>
-
-    <div id="sys" class="screen">
-        <h2 style="color: #f0f;">システム更新（コード貼り替え）</h2>
-        <p>今後、私が新しいコードを出した時は、ここに貼るだけでOKです。</p>
-        <textarea id="up-code" placeholder="ここにコードを貼り付け"></textarea>
-        <button class="update-execute-btn" onclick="runUpdate()">このボタンを押してアプリを即時更新</button>
+        <div id="sys" class="screen">
+            <h1>SYSTEM UPDATE</h1>
+            <div class="box" style="border-color: #f0f;">
+                <p>新しいコードを下に貼り付けて、巨大なボタンを押してください：</p>
+                <textarea id="u-area" placeholder="<html>..."></textarea>
+                <button class="update-trigger" onclick="update()">ここにコードを貼ってこのボタンを押す</button>
+            </div>
+            <div class="box">
+                <p>ジャンル追加</p>
+                <input type="text" id="g-input">
+                <button onclick="addG()">追加</button>
+                <div id="g-list"></div>
+            </div>
+        </div>
     </div>
 
     <script>
+        let genres = JSON.parse(localStorage.getItem('neon_genres')) || ["仕事", "個人"];
         let db;
-        function tab(id) {
+
+        function show(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.big-nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'task') document.getElementById('btn-t').classList.add('active');
-            if(id === 'sys') document.getElementById('btn-s').classList.add('active');
         }
 
-        const req = indexedDB.open("NeonCoreDB", 4);
+        const req = indexedDB.open("NeonCoreDB", 3);
         req.onupgradeneeded = (e) => {
             let d = e.target.result;
             if (!d.objectStoreNames.contains("tasks")) d.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
         };
-        req.onsuccess = (e) => { db = e.target.result; render(); };
+        req.onsuccess = (e) => {
+            db = e.target.result;
+            renderG(); renderT();
+        };
 
-        function addTask() {
-            const val = document.getElementById('in-title').value;
-            if(!val) return;
-            const tx = db.transaction("tasks", "readwrite");
-            tx.objectStore("tasks").add({title: val, created: Date.now()});
-            tx.oncomplete = () => { document.getElementById('in-title').value=""; render(); };
+        function renderG() {
+            const s = document.getElementById('t-genre');
+            const l = document.getElementById('g-list');
+            s.innerHTML = ""; l.innerHTML = "";
+            genres.forEach((g, i) => {
+                s.innerHTML += `<option value="${g}">${g}</option>`;
+                l.innerHTML += `<span>${g} <button onclick="delG(${i})">×</button></span> `;
+            });
+            localStorage.setItem('neon_genres', JSON.stringify(genres));
         }
 
-        function render() {
-            const l = document.getElementById('list');
-            l.innerHTML = "";
+        function addG() { const v = document.getElementById('g-input').value; if(v){genres.push(v); renderG(); document.getElementById('g-input').value="";} }
+        function delG(i) { genres.splice(i, 1); renderG(); }
+
+        function addTask() {
+            const t = document.getElementById('t-title').value;
+            const g = document.getElementById('t-genre').value;
+            const d = document.getElementById('t-date').value;
+            const tm = document.getElementById('t-time').value;
+            if(!t) return;
+            const tx = db.transaction("tasks", "readwrite");
+            tx.objectStore("tasks").add({title:t, genre:g, date:d, time:tm, status:'pending'});
+            tx.oncomplete = () => { document.getElementById('t-title').value=""; renderT(); };
+        }
+
+        function renderT() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = "";
             db.transaction("tasks", "readonly").objectStore("tasks").getAll().onsuccess = (e) => {
                 e.target.result.forEach(t => {
-                    l.innerHTML += `<div style="border-bottom:1px solid #333; padding:10px;">・${t.title}</div>`;
+                    list.innerHTML += `<div style="border:1px solid #555; margin:5px; padding:10px;">
+                        [${t.genre}] ${t.title} - 期限: ${t.date} ${t.time}
+                    </div>`;
                 });
             };
         }
 
-        function runUpdate() {
-            const code = document.getElementById('up-code').value;
+        function update() {
+            const code = document.getElementById('u-area').value;
             if(code.length > 50) {
                 const n = document.open("text/html", "replace");
                 n.write(code);
