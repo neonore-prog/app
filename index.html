@@ -1,144 +1,141 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>NEON-CORE: FINAL</title>
+<meta charset="UTF-8" />
+<title>CYBER PLOT GEN</title>
 <style>
-/* ----------------- 全体 ----------------- */
-body{background:#050505;color:#00f3ff;font-family:'Courier New',monospace;margin:0;display:flex;height:100vh;}
-body::before{content:"";position:fixed;width:100%;height:100%;background:linear-gradient(#00f3ff11 1px,transparent 1px),linear-gradient(90deg,#ff00ff11 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:-1;}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-/* ----------------- サイドナビ ----------------- */
-#nav{width:90px;background:#0a0a0a;border-right:1px solid #0ff;display:flex;flex-direction:column;align-items:center;padding-top:20px;}
-.nav-btn{width:65px;height:65px;border:1px solid #0ff;margin-bottom:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;}
-.nav-btn.active,.nav-btn:hover{background:linear-gradient(45deg,#0ff,#f0f);color:#000;box-shadow:0 0 15px #0ff,0 0 25px #f0f;}
+  body {
+    margin:0; padding:0; height:100vh;
+    background:#050505;
+    font-family: 'Share Tech Mono', monospace, monospace;
+    display:flex; justify-content:center; align-items:center;
+    color:#eee;
+  }
 
-/* ----------------- メイン ----------------- */
-#main{flex:1;padding:20px;overflow-y:auto;}
-.screen{display:none;}
-.screen.active{display:block;}
+  .container {
+    position: relative;
+    background: #000;
+    padding: 30px 40px;
+    border: 3px solid #00f3ff;
+    border-radius: 10px;
+    box-shadow:
+      0 0 15px #00f3ff,
+      0 0 30px #ff00ff,
+      0 0 40px #00f3ff,
+      0 0 60px #ff00ff;
+    width: 380px;
+  }
 
-/* ----------------- タスク入力 ----------------- */
-.box{background:#0d0d0d;border-left:4px solid #f0f;padding:15px;margin-bottom:15px;box-shadow:0 0 10px #0ff33a33 inset;}
-input,select,button{background:#000;border:1px solid #0ff;color:#0ff;padding:6px;margin:3px;}
-button{border-color:#f0f;color:#f0f;font-weight:bold;transition:.2s;}
-button:hover{background:linear-gradient(45deg,#f0f,#0ff);color:#000;box-shadow:0 0 10px #f0f,0 0 15px #0ff;}
+  /* 走査線エフェクト */
+  .container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 255, 255, 0.1),
+      rgba(0, 255, 255, 0.1) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+    animation: scanlineMove 5s linear infinite;
+    border-radius: 10px;
+  }
 
-/* ----------------- タスクリスト ----------------- */
-.task-item{display:flex;justify-content:space-between;padding:8px;margin:5px 0;border-left:3px solid #0ff;transition:.2s;}
-.task-item.danger{border-left:3px solid #ff0033;color:#ff0033;animation: blink 1s infinite alternate;}
-@keyframes blink{0%{opacity:1}100%{opacity:0.6}}
+  @keyframes scanlineMove {
+    0% { background-position-y: 0; }
+    100% { background-position-y: 40px; }
+  }
 
-/* ----------------- ジャンル ----------------- */
-.genre-tag{background:#0ff;color:#000;padding:4px 10px;border-radius:12px;font-size:12px;position:relative;transition:.2s;margin-right:5px;}
-.genre-tag:hover{box-shadow:0 0 10px #0ff,0 0 20px #f0f;}
-.genre-tag .del-btn{position:absolute;top:-5px;right:-5px;background:#ff0033;width:16px;height:16px;border-radius:50%;color:#fff;font-size:12px;line-height:16px;text-align:center;cursor:pointer;opacity:0;pointer-events:none;transition:.2s;}
-.genre-tag:hover .del-btn{opacity:1;pointer-events:auto;}
+  h1 {
+    font-size: 1.8rem;
+    text-align: center;
+    color: #a100ff;
+    text-shadow:
+      0 0 8px #a100ff,
+      0 0 15px #ff00ff;
+    margin-bottom: 30px;
+    letter-spacing: 0.2em;
+  }
+
+  .item {
+    margin-bottom: 22px;
+  }
+
+  .label {
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    color: #eee;
+    text-shadow:
+      0 0 5px #00ffff;
+  }
+
+  .value {
+    font-size: 1.1rem;
+    line-height: 1.3em;
+  }
+
+  /* 各色ネオン */
+  .subject {
+    color: #ffa500;
+    text-shadow: 0 0 8px #ffa500, 0 0 15px #ffb733;
+  }
+
+  .event {
+    color: #ff00ff;
+    text-shadow: 0 0 8px #ff00ff, 0 0 20px #ff33ff;
+  }
+
+  .objective {
+    color: #ffff00;
+    text-shadow: 0 0 8px #ffff00, 0 0 15px #fffb33;
+  }
+
+  .blocker {
+    color: #00ff99;
+    text-shadow: 0 0 8px #00ff99, 0 0 15px #33ffbb;
+  }
+
+  .termination {
+    color: #ff0044;
+    text-shadow: 0 0 8px #ff0044, 0 0 18px #ff4477;
+  }
 </style>
 </head>
 <body>
-<!-- サイドナビ -->
-<div id="nav">
-  <div class="nav-btn active" id="nb-t" onclick="sw('t')">TASK</div>
-  <div class="nav-btn" id="nb-s" onclick="sw('s')">SYS</div>
-</div>
+  <div class="container" role="main" aria-label="Cyber Plot Generator">
+    <h1>CYBER PLOT GEN</h1>
 
-<!-- メイン -->
-<div id="main">
-  <!-- TASK画面 -->
-  <div id="sc-t" class="screen active">
-    <h1>TASK TERMINAL</h1>
-    <div class="box">
-      <input type="text" id="tit" placeholder="タスク内容">
-      <select id="gen"></select>
-      <input type="date" id="dat">
-      <button onclick="addT()">PUSH</button>
+    <div class="item">
+      <div class="label">SUBJECT / 主人公</div>
+      <div class="value subject">超ポジティブな料理部員</div>
     </div>
-    <div id="genre-edit" class="box"></div>
-    <div id="list"></div>
-  </div>
 
-  <!-- SYS画面 -->
-  <div id="sc-s" class="screen">
-    <h1>SYSTEM CONTROL</h1>
-    <div class="box">
-      <h3>CORE UPDATE</h3>
-      <textarea id="up-code" style="width:100%;height:200px;background:#000;color:#0f0;" placeholder="ここに新しいHTMLを丸ごと貼る"></textarea>
-      <button class="update-btn" onclick="up()">システム更新を実行</button>
+    <div class="item">
+      <div class="label">EVENT / きっかけ</div>
+      <div class="value event">弱小の部活に無理やり勧誘された</div>
+    </div>
+
+    <div class="item">
+      <div class="label">OBJECTIVE / 目的</div>
+      <div class="value objective">過去の自分にメッセージを伝える</div>
+    </div>
+
+    <div class="item">
+      <div class="label">BLOCKER / 障害</div>
+      <div class="value blocker">初戦の相手が全国王者の怪物だった</div>
+    </div>
+
+    <div class="item">
+      <div class="label">TERMINATION / 結末</div>
+      <div class="value termination">なぜか全員でラインダンスを踊る羽目になる</div>
     </div>
   </div>
-</div>
-
-<script>
-/* ----------------- データ保持 ----------------- */
-let tasks=JSON.parse(localStorage.getItem('neon_tasks'))||[];
-let genres=JSON.parse(localStorage.getItem('neon_genres'))||["Work","Personal","Hobby"];
-
-/* ----------------- 初期設定 ----------------- */
-const genSel=document.getElementById('gen');
-const genreEdit=document.getElementById('genre-edit');
-
-function initGenres(){
-  genSel.innerHTML="";
-  genreEdit.innerHTML="";
-  genres.forEach(g=>{
-    // 選択用
-    const o=document.createElement('option'); o.value=g; o.textContent=g; genSel.appendChild(o);
-    // 編集用
-    const span=document.createElement('span'); span.className='genre-tag'; span.textContent=g;
-    const del=document.createElement('span'); del.className='del-btn'; del.textContent='×';
-    del.onclick=()=>{genres=genres.filter(x=>x!==g); localStorage.setItem('neon_genres',JSON.stringify(genres)); initGenres(); render();};
-    span.appendChild(del);
-    genreEdit.appendChild(span);
-  });
-}
-initGenres();
-
-/* ----------------- アプリ切替 ----------------- */
-function sw(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sc-'+id).classList.add('active');
-  document.getElementById('nb-'+id).classList.add('active');
-}
-
-/* ----------------- タスク操作 ----------------- */
-function addT(){
-  const title=document.getElementById('tit').value;
-  const genre=document.getElementById('gen').value;
-  const date=document.getElementById('dat').value||new Date().toISOString().split('T')[0];
-  if(!title){alert("内容を入力してください"); return;}
-  const newTask={title,genre,date,id:Date.now()};
-  tasks.push(newTask);
-  localStorage.setItem('neon_tasks',JSON.stringify(tasks));
-  document.getElementById('tit').value="";
-  render();
-}
-function delT(id){tasks=tasks.filter(t=>t.id!==id);localStorage.setItem('neon_tasks',JSON.stringify(tasks));render();}
-
-/* ----------------- レンダリング ----------------- */
-function render(){
-  const l=document.getElementById('list');
-  l.innerHTML="<h3>CURRENT TASKS</h3>";
-  tasks.forEach(t=>{
-    const d=new Date(t.date), now=new Date();
-    const danger=(d<now);
-    const div=document.createElement('div'); div.className='task-item'+(danger?' danger':'');
-    div.innerHTML=`<div><span style="color:#ff00ff">[${t.genre}]</span> <strong>${t.title}</strong> <span style="margin-left:10px;font-size:0.8em;">期限:${t.date}</span></div><button onclick="delT(${t.id})">削除</button>`;
-    l.appendChild(div);
-  });
-}
-render();
-
-/* ----------------- システム更新 ----------------- */
-function up(){
-  const c=document.getElementById('up-code').value;
-  if(!c)return;
-  const w=window.open();
-  w.document.open();
-  w.document.write(c);
-  w.document.close();
-}
-</script>
 </body>
 </html>
