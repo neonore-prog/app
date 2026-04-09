@@ -2,180 +2,208 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>NEON CORE: ENHANCED</title>
-
+<title>NEON CORE: PRIME</title>
 <style>
 :root {
-    --bg: #050505;
-    --panel: #0d0d0d;
+    --bg: #030303;
+    --card: #0a0a0c;
     --cyan: #00f3ff;
+    --cyan-glow: rgba(0, 243, 255, 0.4);
     --pink: #ff00ff;
-    --red: #ff0033;
-    --dim: #333;
+    --pink-glow: rgba(255, 0, 255, 0.3);
+    --red: #ff1e56;
+    --text: #e0e0e0;
+    --sub: #666;
 }
 
 body {
     margin: 0;
     background: var(--bg);
-    color: var(--cyan);
-    font-family: 'Consolas', 'Monaco', 'Meiryo', monospace;
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', 'Meiryo', sans-serif;
     display: flex;
     height: 100vh;
 }
 
-/* 背景グリッド */
+/* スタイリッシュな背景演出 */
 body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: 
-        linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #030303 100%);
+    z-index: -1;
 }
 
+/* ナビゲーションバー */
 #nav {
-    width: 80px;
-    background: var(--panel);
-    border-right: 1px solid var(--cyan);
+    width: 70px;
+    background: rgba(0, 0, 0, 0.8);
+    border-right: 1px solid #1a1a1a;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 20px;
-    z-index: 10;
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    padding-top: 30px;
+    backdrop-filter: blur(10px);
 }
 
 .nav-btn {
-    width: 60px; height: 60px;
-    border: 1px solid var(--cyan);
-    margin-bottom: 15px;
+    width: 44px; height: 44px;
+    border: 1px solid #333;
+    margin-bottom: 25px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: 0.2s;
-    font-weight: bold;
-    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--sub);
+    letter-spacing: 1px;
 }
 
-.nav-btn:hover { background: rgba(0, 243, 255, 0.1); }
+.nav-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 .nav-btn.active {
     background: var(--cyan);
     color: #000;
-    box-shadow: 0 0 15px var(--cyan);
+    box-shadow: 0 0 20px var(--cyan-glow);
+    border-color: var(--cyan);
 }
 
+/* メインセクション */
 #main {
     flex: 1;
-    padding: 30px;
+    padding: 40px 60px;
     overflow-y: auto;
-    z-index: 5;
-    position: relative;
+    scrollbar-width: none;
+}
+#main::-webkit-scrollbar { display: none; }
+
+h2 {
+    font-weight: 200;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    margin: 0 0 40px 0;
+    color: #fff;
 }
 
 .box {
-    background: rgba(13, 13, 13, 0.9);
-    border: 1px solid var(--dim);
-    border-left: 4px solid var(--pink);
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: var(--card);
+    border: 1px solid #1a1a1a;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+    position: relative;
 }
 
-h2, h3 { 
-    margin-top: 0; 
-    letter-spacing: 2px;
-    text-transform: uppercase;
+/* 入力エリアの洗練 */
+.input-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
-input, select, button, textarea {
+input, select, textarea {
     background: #000;
-    border: 1px solid var(--cyan);
-    color: var(--cyan);
-    padding: 10px;
-    margin: 5px;
-    font-family: inherit;
+    border: 1px solid #222;
+    color: #fff;
+    padding: 12px 18px;
+    font-size: 14px;
+    border-radius: 2px;
+    transition: border 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: var(--cyan);
     outline: none;
 }
 
 button {
-    border-color: var(--pink);
+    background: transparent;
+    border: 1px solid var(--pink);
     color: var(--pink);
+    padding: 12px 24px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 12px;
+    transition: all 0.3s;
 }
 
 button:hover {
     background: var(--pink);
     color: #000;
-    box-shadow: 0 0 10px var(--pink);
+    box-shadow: 0 0 25px var(--pink-glow);
 }
 
+/* タスクアイテム */
 .task {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    margin: 10px 0;
-    background: #000;
-    border-left: 3px solid var(--cyan);
-    border-bottom: 1px solid #222;
+    padding: 20px;
+    margin: 12px 0;
+    background: #050505;
+    border: 1px solid #111;
+    transition: transform 0.2s;
 }
 
-.danger {
-    border-left-color: var(--red);
-    color: var(--red);
+.task:hover {
+    border-color: #333;
+    transform: translateX(5px);
 }
 
-.sub {
-    font-size: 12px;
-    color: #888;
-    margin-top: 5px;
+.task.danger {
+    border-left: 4px solid var(--red);
 }
 
-.archive {
-    opacity: 0.4;
-    border-left-color: var(--dim);
+.task-info strong {
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 4px;
 }
 
-/* ジャンル編集エリア */
+.sub-text {
+    font-size: 11px;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.genre-tag-small {
+    color: var(--cyan);
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* ジャンル編集 */
 #genre-edit {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 15px 0;
+    gap: 8px;
+    margin: 20px 0;
 }
 
-.genre-tag {
-    background: var(--cyan);
-    color: #000;
-    padding: 5px 12px;
+.genre-pill {
+    background: #111;
+    border: 1px solid #222;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    position: relative;
+    font-size: 11px;
     display: flex;
     align-items: center;
+    color: var(--cyan);
 }
 
-.del-btn {
+.del-x {
     margin-left: 8px;
-    background: var(--red);
-    color: #fff;
-    border-radius: 50%;
-    width: 16px; height: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--red);
     cursor: pointer;
-    font-size: 10px;
+    font-weight: bold;
 }
 
-#new-genre-input { width: 150px; }
+.archive { opacity: 0.3; filter: grayscale(1); }
 
 </style>
 </head>
@@ -184,50 +212,49 @@ button:hover {
 
 <div id="nav">
     <div class="nav-btn active" onclick="sw('t')">TASK</div>
-    <div class="nav-btn" onclick="sw('s')">SYS</div>
+    <div class="nav-btn" onclick="sw('s')">CORE</div>
 </div>
 
 <div id="main">
 
     <div id="sc-t">
-        <h2 style="color:var(--pink);">TERMINAL: TASK_MANAGEMENT</h2>
+        <h2>TERMINAL_</h2>
 
         <div class="box">
-            <input id="title" placeholder="ENTER TASK..." style="width: 250px;">
-            <select id="mode">
-                <option value="once">SINGLE</option>
-                <option value="daily">DAILY</option>
-                <option value="custom">ROUTINE</option>
-            </select>
-            <select id="genre"></select>
-            <input type="date" id="date">
-            <button onclick="add()">PUSH</button>
+            <div class="input-group">
+                <input id="title" placeholder="WHAT NEEDS TO BE DONE?" style="flex:1;">
+                <select id="mode">
+                    <option value="once">ONCE</option>
+                    <option value="daily">DAILY</option>
+                    <option value="custom">ROUTINE</option>
+                </select>
+                <select id="genre"></select>
+                <input type="date" id="date">
+                <button onclick="add()">PUSH</button>
+            </div>
 
-            <div style="margin-top:20px; border-top: 1px solid #222; padding-top: 15px;">
-                <strong style="font-size: 0.8em; color: var(--pink);">GENRE_EDITOR</strong>
+            <div style="margin-top:30px; padding-top:20px; border-top:1px solid #1a1a1a;">
+                <div class="sub-text" style="margin-bottom:10px;">Genre Configuration</div>
                 <div id="genre-edit"></div>
-                <input id="new-genre-input" placeholder="NEW GENRE..." maxlength="20">
-                <button id="add-genre-btn">REGISTER</button>
+                <div class="input-group">
+                    <input id="new-genre-input" placeholder="NEW CATEGORY..." maxlength="20">
+                    <button onclick="addGenre()" style="border-color:var(--cyan); color:var(--cyan); padding:8px 15px;">Add</button>
+                </div>
             </div>
         </div>
 
-        <div class="box" style="border-left-color: var(--cyan);">
-            <h3>ACTIVE_TASKS</h3>
-            <div id="active"></div>
-        </div>
+        <h3 class="sub-text" style="color:var(--cyan);">Active Operations</h3>
+        <div id="active"></div>
 
-        <div class="box" style="border-left-color: var(--dim);">
-            <h3>HISTORY_LOG</h3>
-            <div id="archive"></div>
-        </div>
+        <h3 class="sub-text" style="margin-top:50px;">Legacy Logs</h3>
+        <div id="archive"></div>
     </div>
 
     <div id="sc-s" style="display:none;">
-        <h2 style="color:var(--pink);">SYSTEM_CORE</h2>
+        <h2>CORE_UPDATE</h2>
         <div class="box">
-            <p style="font-size: 0.9em; color: #888;">UPDATE SOURCE CODE:</p>
-            <textarea id="code" style="width:100%; height:300px; font-family: monospace;"></textarea>
-            <button onclick="update()" style="width: 100%; margin-top: 15px;">EXECUTE_UPDATE</button>
+            <textarea id="code" style="width:100%; height:400px; font-family: 'Consolas', monospace; border-color:#333;"></textarea>
+            <button onclick="update()" style="width:100%; margin-top:20px;">Deploy Changes</button>
         </div>
     </div>
 
@@ -312,7 +339,7 @@ function addGenre(){
 }
 
 function delGenre(genre){
-    if(!confirm(`Delete Genre: "${genre}"?`)) return;
+    if(!confirm(`Delete: ${genre}?`)) return;
     DB.genres = DB.genres.filter(g => g !== genre);
     save();
     render();
@@ -330,15 +357,10 @@ function render(){
     const ge = document.getElementById("genre-edit");
     ge.innerHTML = "";
     DB.genres.forEach(genre => {
-        const span = document.createElement("span");
-        span.className = "genre-tag";
-        span.textContent = genre;
-        const dBtn = document.createElement("span");
-        dBtn.className = "del-btn";
-        dBtn.textContent = "×";
-        dBtn.onclick = () => delGenre(genre);
-        span.appendChild(dBtn);
-        ge.appendChild(span);
+        const div = document.createElement("div");
+        div.className = "genre-pill";
+        div.innerHTML = `${genre} <span class="del-x" onclick="delGenre('${genre}')">×</span>`;
+        ge.appendChild(div);
     });
 
     const a = document.getElementById("active");
@@ -347,13 +369,13 @@ function render(){
         const div = document.createElement("div");
         div.className = isDanger(t.date) ? "task danger" : "task";
         div.innerHTML = `
-            <div>
-                <span style="color:var(--pink); font-size:0.8em;">[${t.genre}]</span> <strong>${t.title}</strong>
-                <div class="sub">${t.mode.toUpperCase()} / DUE: ${t.date || "---"}</div>
+            <div class="task-info">
+                <strong><span class="genre-tag-small">[${t.genre}]</span> ${t.title}</strong>
+                <span class="sub-text">${t.mode} / DUE: ${t.date || "NO_LIMIT"}</span>
             </div>
             <div>
-                <button onclick="done(${t.id})" style="border-color:var(--cyan); color:var(--cyan);">DONE</button>
-                <button onclick="del(${t.id})">DEL</button>
+                <button onclick="done(${t.id})" style="border-color:var(--cyan); color:var(--cyan); font-size:10px; padding:8px 15px;">Complete</button>
+                <button onclick="del(${t.id})" style="border-color:#333; color:#555; font-size:10px; padding:8px 15px;">Del</button>
             </div>
         `;
         a.appendChild(div);
@@ -361,12 +383,14 @@ function render(){
 
     const ar = document.getElementById("archive");
     ar.innerHTML = "";
-    DB.archive.slice(0, 10).forEach(t => {
+    DB.archive.slice(0, 5).forEach(t => {
         const div = document.createElement("div");
         div.className = "task archive";
         div.innerHTML = `
-            <div>[${t.genre}] ${t.title}</div>
-            <button onclick="copy(${t.id})">RE-PUSH</button>
+            <div class="task-info">
+                <strong>[${t.genre}] ${t.title}</strong>
+            </div>
+            <button onclick="copy(${t.id})" style="font-size:10px; padding:8px 15px;">Restore</button>
         `;
         ar.appendChild(div);
     });
@@ -387,7 +411,6 @@ function init(){
     render();
 }
 
-document.getElementById("add-genre-btn").onclick = addGenre;
 init();
 </script>
 </body>
