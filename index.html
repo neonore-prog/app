@@ -2,145 +2,323 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>NEON-CORE FIX-01</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON-CORE v2.2</title>
     <style>
-        /* 装飾を最低限にし、確実に「見える」ことを優先 */
-        body { background: #000; color: #0f0; font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
-        
-        /* 左側のメニュー（絶対に隠れないように固定） */
-        #nav { 
-            width: 120px; 
-            background: #111; 
-            border-right: 2px solid #0f0; 
-            display: flex; 
-            flex-direction: column; 
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0d0d0d;
+            --accent-cyan: #00f3ff;
+            --accent-pink: #ff00ff;
+            --accent-lime: #00ff9f;
+            --text-color: #e0e0e0;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none; z-index: 0;
+        }
+
+        #container { display: flex; height: 100vh; position: relative; z-index: 10; }
+
+        /* 左サイドメニュー */
+        #sidebar {
+            width: 80px; background: var(--panel-bg);
+            border-right: 2px solid var(--accent-cyan);
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 20px; box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            z-index: 20;
+        }
+
+        .nav-icon {
+            width: 55px; height: 55px; margin-bottom: 20px;
+            border: 1px solid var(--accent-cyan);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--accent-cyan);
+            transition: 0.3s; font-size: 11px; font-weight: bold;
+            background: transparent;
+        }
+
+        .nav-icon:hover { background: rgba(0, 243, 255, 0.1); }
+        .nav-icon.active {
+            background: var(--accent-cyan); color: black;
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        /* メインコンテンツ */
+        #main-content { flex: 1; padding: 25px; overflow-y: auto; z-index: 10; }
+
+        .app-screen { display: none; }
+        .app-screen.active { display: block; }
+
+        h1 { color: var(--accent-cyan); text-shadow: 0 0 5px var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan); padding-bottom: 10px; }
+
+        .input-box {
+            background: #111; border: 1px solid #333; padding: 15px;
+            margin-bottom: 25px; border-left: 5px solid var(--accent-pink);
+        }
+
+        input, select, button {
+            background: #000; border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan); padding: 10px; margin: 5px;
+            font-family: inherit;
+        }
+
+        button { cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        button:hover { background: var(--accent-cyan); color: #000; }
+
+        .task-list { display: grid; gap: 15px; }
+        .task-item {
+            background: rgba(13, 13, 13, 0.9); border: 1px solid #333;
+            padding: 15px; display: flex; justify-content: space-between;
+            align-items: center; border-left: 5px solid var(--accent-cyan);
+        }
+
+        .task-item.completed { border-left-color: var(--accent-lime); opacity: 0.5; }
+        .task-info { flex: 1; margin-left: 15px; }
+        .tag { font-size: 0.75em; padding: 3px 8px; background: #222; border: 1px solid #444; margin-right: 8px; color: var(--accent-cyan); }
+        .due-info { color: var(--accent-pink); font-size: 0.85em; margin-top: 5px; }
+
+        /* システム・アップデート専用 */
+        #update-area { 
+            width: 100%; height: 250px; 
+            background: #000; color: #0f0; 
+            border: 1px solid var(--accent-pink); 
+            margin-top: 10px; font-family: monospace;
             padding: 10px;
-            flex-shrink: 0;
         }
-
-        .nav-btn { 
-            background: #000; 
-            color: #0f0; 
-            border: 1px solid #0f0; 
-            padding: 15px 5px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            text-align: center;
-            font-weight: bold;
+        .update-btn {
+            background: var(--accent-pink) !important;
+            color: black !important;
+            width: 100%;
+            padding: 20px !important;
+            margin-top: 20px !important;
+            font-size: 1.2em !important;
+            border: none !important;
         }
-
-        .nav-btn:active { background: #0f0; color: #000; }
-
-        /* 右側のメイン画面 */
-        #content { flex: 1; padding: 20px; overflow-y: auto; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-
-        .box { border: 1px solid #0f0; padding: 15px; margin-bottom: 20px; }
-        textarea { width: 100%; height: 200px; background: #111; color: #0f0; border: 1px solid #0f0; }
-        .update-trigger { background: #f0f; color: #000; width: 100%; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border: none; }
-        
-        input, select, button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; }
     </style>
 </head>
 <body>
-
-    <div id="nav">
-        <div class="nav-btn" onclick="show('task')">タスク管理</div>
-        <div class="nav-btn" onclick="show('sys')">システム更新</div>
-    </div>
-
-    <div id="content">
-        <div id="task" class="screen active">
-            <h1>TASK TERMINAL</h1>
-            <div class="box">
-                <input type="text" id="t-title" placeholder="タスク名">
-                <select id="t-genre"></select>
-                <input type="date" id="t-date">
-                <input type="time" id="t-time" value="20:00">
-                <button onclick="addTask()">登録</button>
-            </div>
-            <div id="task-list"></div>
+    <div class="grid-overlay"></div>
+    <div id="container">
+        <div id="sidebar">
+            <div id="btn-task" class="nav-icon active" onclick="switchApp('task')">TASK</div>
+            <div id="btn-system" class="nav-icon" onclick="switchApp('system')">SYS</div>
         </div>
+        
+        <div id="main-content">
+            <div id="app-task" class="app-screen active">
+                <h1>TASK TERMINAL</h1>
+                
+                <div class="input-box">
+                    <input type="text" id="task-title" placeholder="ENTER NEW TASK..." style="width: 300px;">
+                    <select id="task-genre"></select>
+                    <select id="task-type">
+                        <option value="single">SINGLE</option>
+                        <option value="daily">DAILY</option>
+                        <option value="routine">ROUTINE</option>
+                    </select>
+                    <br>
+                    <label style="margin-left: 5px;">DUE DATE:</label>
+                    <input type="date" id="task-date">
+                    <input type="time" id="task-alarm" value="20:00">
+                    <button onclick="addTask()">PUSH TO LIST</button>
+                </div>
 
-        <div id="sys" class="screen">
-            <h1>SYSTEM UPDATE</h1>
-            <div class="box" style="border-color: #f0f;">
-                <p>新しいコードを下に貼り付けて、巨大なボタンを押してください：</p>
-                <textarea id="u-area" placeholder="<html>..."></textarea>
-                <button class="update-trigger" onclick="update()">ここにコードを貼ってこのボタンを押す</button>
+                <div id="current-tasks" class="task-list"></div>
+                <h2 style="color: var(--accent-pink); margin-top: 50px;">HISTORY_LOG</h2>
+                <div id="history-tasks" class="task-list"></div>
             </div>
-            <div class="box">
-                <p>ジャンル追加</p>
-                <input type="text" id="g-input">
-                <button onclick="addG()">追加</button>
-                <div id="g-list"></div>
+
+            <div id="app-system" class="app-screen">
+                <h1>SYSTEM CONTROL</h1>
+                
+                <div class="input-box" style="border-left-color: var(--accent-cyan);">
+                    <h3>GENRE_EDITOR</h3>
+                    <div id="genre-list" style="margin-bottom: 15px;"></div>
+                    <input type="text" id="new-genre" placeholder="NEW GENRE...">
+                    <button onclick="addGenre()">REGISTER</button>
+                </div>
+
+                <div class="input-box" style="border-left-color: var(--accent-pink);">
+                    <h3>CORE_UPDATE_INTERFACE</h3>
+                    <p>PASTE NEW SOURCE CODE HERE:</p>
+                    <textarea id="update-area" placeholder="<html>..."></textarea>
+                    <button class="update-btn" onclick="applyUpdate()">EXECUTE SYSTEM UPDATE</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let genres = JSON.parse(localStorage.getItem('neon_genres')) || ["仕事", "個人"];
         let db;
+        let genres = JSON.parse(localStorage.getItem('neon_genres')) || ["Work", "Personal", "Hobby"];
+        
+        // --- 起動処理 ---
+        const request = indexedDB.open("NeonCoreDB", 2);
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            renderGenres();
+            renderTasks();
+            setInterval(checkAlarms, 30000); 
+        };
+        request.onupgradeneeded = (e) => {
+            let database = e.target.result;
+            if (!database.objectStoreNames.contains("tasks")) {
+                database.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
+            }
+        };
 
-        function show(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        // --- アプリ切り替えロジック ---
+        function switchApp(appId) {
+            // 全画面非表示
+            document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+            // 全ボタンからactive除去
+            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+            
+            // 対象を表示
+            document.getElementById('app-' + appId).classList.add('active');
+            // クリックしたボタンをactiveに
+            if (appId === 'task') document.getElementById('btn-task').classList.add('active');
+            if (appId === 'system') document.getElementById('btn-system').classList.add('active');
         }
 
-        const req = indexedDB.open("NeonCoreDB", 3);
-        req.onupgradeneeded = (e) => {
-            let d = e.target.result;
-            if (!d.objectStoreNames.contains("tasks")) d.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
-        };
-        req.onsuccess = (e) => {
-            db = e.target.result;
-            renderG(); renderT();
-        };
+        // --- ジャンル管理 ---
+        function renderGenres() {
+            const select = document.getElementById('task-genre');
+            const list = document.getElementById('genre-list');
+            if (!select || !list) return;
 
-        function renderG() {
-            const s = document.getElementById('t-genre');
-            const l = document.getElementById('g-list');
-            s.innerHTML = ""; l.innerHTML = "";
-            genres.forEach((g, i) => {
-                s.innerHTML += `<option value="${g}">${g}</option>`;
-                l.innerHTML += `<span>${g} <button onclick="delG(${i})">×</button></span> `;
+            select.innerHTML = ""; list.innerHTML = "";
+            genres.forEach((g, index) => {
+                select.innerHTML += `<option value="${g}">${g}</option>`;
+                list.innerHTML += `<span class="tag">${g} <span style="cursor:pointer;color:var(--accent-pink)" onclick="deleteGenre(${index})">×</span></span>`;
             });
             localStorage.setItem('neon_genres', JSON.stringify(genres));
         }
 
-        function addG() { const v = document.getElementById('g-input').value; if(v){genres.push(v); renderG(); document.getElementById('g-input').value="";} }
-        function delG(i) { genres.splice(i, 1); renderG(); }
-
-        function addTask() {
-            const t = document.getElementById('t-title').value;
-            const g = document.getElementById('t-genre').value;
-            const d = document.getElementById('t-date').value;
-            const tm = document.getElementById('t-time').value;
-            if(!t) return;
-            const tx = db.transaction("tasks", "readwrite");
-            tx.objectStore("tasks").add({title:t, genre:g, date:d, time:tm, status:'pending'});
-            tx.oncomplete = () => { document.getElementById('t-title').value=""; renderT(); };
+        function addGenre() {
+            const val = document.getElementById('new-genre').value;
+            if(val && !genres.includes(val)) { 
+                genres.push(val); renderGenres(); document.getElementById('new-genre').value = ""; 
+            }
         }
 
-        function renderT() {
-            const list = document.getElementById('task-list');
-            list.innerHTML = "";
+        function deleteGenre(index) {
+            genres.splice(index, 1); renderGenres();
+        }
+
+        // --- タスク操作 ---
+        function addTask(copyData = null) {
+            const title = copyData ? copyData.title : document.getElementById('task-title').value;
+            const genre = copyData ? copyData.genre : document.getElementById('task-genre').value;
+            const type = copyData ? copyData.type : document.getElementById('task-type').value;
+            const date = copyData ? copyData.date : document.getElementById('task-date').value;
+            const alarm = copyData ? copyData.alarm : document.getElementById('task-alarm').value;
+
+            if (!title) return;
+
+            const task = {
+                title, genre, type, date, alarm,
+                status: 'pending',
+                created: new Date().getTime()
+            };
+
+            const tx = db.transaction("tasks", "readwrite");
+            tx.objectStore("tasks").add(task);
+            tx.oncomplete = () => {
+                if(!copyData) document.getElementById('task-title').value = "";
+                renderTasks();
+            };
+        }
+
+        function toggleTask(id) {
+            const tx = db.transaction("tasks", "readwrite");
+            const store = tx.objectStore("tasks");
+            store.get(id).onsuccess = (e) => {
+                const data = e.target.result;
+                data.status = data.status === 'completed' ? 'pending' : 'completed';
+                store.put(data);
+                tx.oncomplete = renderTasks;
+            };
+        }
+
+        function renderTasks() {
+            const currentContainer = document.getElementById('current-tasks');
+            const historyContainer = document.getElementById('history-tasks');
+            if (!currentContainer || !historyContainer) return;
+
+            currentContainer.innerHTML = ""; historyContainer.innerHTML = "";
+
             db.transaction("tasks", "readonly").objectStore("tasks").getAll().onsuccess = (e) => {
-                e.target.result.forEach(t => {
-                    list.innerHTML += `<div style="border:1px solid #555; margin:5px; padding:10px;">
-                        [${t.genre}] ${t.title} - 期限: ${t.date} ${t.time}
-                    </div>`;
+                const allTasks = e.target.result.sort((a,b) => b.created - a.created);
+                allTasks.forEach(task => {
+                    const html = `
+                        <div class="task-item ${task.status === 'completed' ? 'completed' : ''}">
+                            <div class="task-info">
+                                <span class="tag">${task.genre}</span>
+                                <strong>${task.title}</strong>
+                                <div class="due-info">DUE: ${task.date || '---'} / ALARM: ${task.alarm} [${task.type}]</div>
+                            </div>
+                            <div>
+                                <button onclick="toggleTask(${task.id})">${task.status === 'completed' ? 'BACK' : 'DONE'}</button>
+                                <button onclick='addTask(${JSON.stringify(task)})'>COPY</button>
+                            </div>
+                        </div>
+                    `;
+                    if (task.status === 'pending') currentContainer.innerHTML += html;
+                    else historyContainer.innerHTML += html;
                 });
             };
         }
 
-        function update() {
-            const code = document.getElementById('u-area').value;
-            if(code.length > 50) {
-                const n = document.open("text/html", "replace");
-                n.write(code);
-                n.close();
+        // --- アラーム判定 ---
+        function checkAlarms() {
+            const now = new Date();
+            const nowDate = now.toISOString().split('T')[0];
+            const nowTime = now.toTimeString().slice(0, 5);
+
+            db.transaction("tasks", "readonly").objectStore("tasks").getAll().onsuccess = (e) => {
+                e.target.result.forEach(task => {
+                    if (task.status === 'pending' && task.date === nowDate && task.alarm === nowTime) {
+                        triggerAlarm(task.title);
+                    }
+                });
+            };
+        }
+
+        function triggerAlarm(title) {
+            document.body.style.backgroundColor = "red";
+            setTimeout(() => document.body.style.backgroundColor = "#050505", 500);
+            if (Notification.permission === "granted") {
+                new Notification("NEON-CORE ALERT", { body: title });
+            } else {
+                alert("DEADLINE: " + title);
+            }
+        }
+
+        if (Notification.permission !== "granted") Notification.requestPermission();
+
+        // --- システム更新機能 ---
+        function applyUpdate() {
+            const code = document.getElementById('update-area').value;
+            if (code.trim().startsWith("<!DOCTYPE html>") || code.includes("<html")) {
+                const newDoc = document.open("text/html", "replace");
+                newDoc.write(code);
+                newDoc.close();
+            } else {
+                alert("INVALID CODE: HTML形式で貼り付けてください。");
             }
         }
     </script>
