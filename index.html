@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>NEON-CORE</title>
+<title>NEON CORE</title>
 
 <style>
 body{
@@ -14,23 +14,24 @@ body{
     height:100vh;
 }
 
-/* グリッド */
+/* 軽いグリッド */
 body::before{
     content:"";
     position:fixed;
     width:100%;
     height:100%;
     background:
-    linear-gradient(#00f3ff22 1px,transparent 1px),
-    linear-gradient(90deg,#00f3ff22 1px,transparent 1px);
+    linear-gradient(#00f3ff11 1px,transparent 1px),
+    linear-gradient(90deg,#00f3ff11 1px,transparent 1px);
     background-size:40px 40px;
+    pointer-events:none;
 }
 
 /* ナビ */
 #nav{
     width:90px;
     background:#0a0a0a;
-    border-right:2px solid #00f3ff;
+    border-right:1px solid #00f3ff;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -39,19 +40,17 @@ body::before{
 
 .nav-btn{
     width:65px;height:65px;
-    border:2px solid #00f3ff;
+    border:1px solid #00f3ff;
     margin-bottom:15px;
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    transition:0.2s;
 }
 
 .nav-btn.active{
     background:#00f3ff;
     color:#000;
-    box-shadow:0 0 15px #00f3ff;
 }
 
 /* メイン */
@@ -60,13 +59,13 @@ body::before{
     padding:20px;
 }
 
-/* ネオン枠 */
+/* ボックス */
 .box{
     background:#0d0d0d;
-    border:2px solid #00f3ff;
-    box-shadow:0 0 10px #00f3ff, inset 0 0 10px #00f3ff22;
+    border:1px solid #222;
+    border-left:4px solid #ff00ff;
     padding:15px;
-    margin-bottom:20px;
+    margin-bottom:15px;
 }
 
 /* 入力 */
@@ -78,6 +77,7 @@ input,select,button{
     margin:3px;
 }
 
+/* ボタン */
 button{
     border-color:#ff00ff;
     color:#ff00ff;
@@ -86,35 +86,27 @@ button{
 button:hover{
     background:#ff00ff;
     color:#000;
-    box-shadow:0 0 10px #ff00ff;
 }
 
 /* タスク */
 .task{
     display:flex;
     justify-content:space-between;
-    padding:10px;
-    margin:8px 0;
-    border-left:4px solid #00f3ff;
-    background:#050505;
-    box-shadow:0 0 5px #00f3ff22;
-}
-
-/* カラフル */
-.genre{
-    color:#ffcc00;
-}
-
-.mode{
-    color:#00ff9f;
-    font-size:12px;
+    padding:8px;
+    margin:5px 0;
+    border-left:3px solid #00f3ff;
 }
 
 /* 危険（期限近い） */
 .danger{
+    border-left:3px solid #ff0033;
     color:#ff0033;
-    text-shadow:0 0 8px #ff0033;
-    border-left:4px solid #ff0033 !important;
+}
+
+/* 小テキスト */
+.sub{
+    font-size:12px;
+    color:#888;
 }
 
 /* アーカイブ */
@@ -134,8 +126,7 @@ button:hover{
 <div id="main">
 
 <div id="sc-t">
-
-<h2 style="color:#ff00ff;">TASK TERMINAL</h2>
+<h2 style="color:#ff00ff;">TASK</h2>
 
 <div class="box">
 <input id="title" placeholder="task">
@@ -179,8 +170,15 @@ button:hover{
 
 <script>
 
-/* ===== DB ===== */
-let DB = JSON.parse(localStorage.getItem("NEON_DB") || "{}");
+/* ===== DB安全読み込み ===== */
+let raw = localStorage.getItem("NEON_DB");
+let DB;
+
+try{
+    DB = JSON.parse(raw) || {};
+}catch{
+    DB = {};
+}
 
 if(!DB.tasks){
     DB = {
@@ -195,7 +193,7 @@ function save(){
     localStorage.setItem("NEON_DB", JSON.stringify(DB));
 }
 
-/* ===== 切替 ===== */
+/* ===== 画面切替 ===== */
 function sw(s){
     document.getElementById("sc-t").style.display = s==="t"?"block":"none";
     document.getElementById("sc-s").style.display = s==="s"?"block":"none";
@@ -203,12 +201,12 @@ function sw(s){
 
 /* ===== 追加 ===== */
 function add(){
-    const title=document.getElementById("title").value;
+    const title = document.getElementById("title").value;
     if(!title) return;
 
     DB.tasks.push({
         id:Date.now(),
-        title,
+        title:title,
         genre:document.getElementById("genre").value,
         mode:document.getElementById("mode").value,
         date:document.getElementById("date").value
@@ -221,8 +219,8 @@ function add(){
 
 /* ===== 完了 ===== */
 function done(id){
-    const t=DB.tasks.find(x=>x.id===id);
-    DB.tasks=DB.tasks.filter(x=>x.id!==id);
+    const t = DB.tasks.find(x=>x.id===id);
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
     DB.archive.push(t);
     save();
     render();
@@ -230,15 +228,15 @@ function done(id){
 
 /* ===== 削除 ===== */
 function del(id){
-    DB.tasks=DB.tasks.filter(x=>x.id!==id);
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
     save();
     render();
 }
 
 /* ===== コピー ===== */
 function copy(id){
-    const t=DB.archive.find(x=>x.id===id);
-    DB.tasks.push({...t,id:Date.now()});
+    const t = DB.archive.find(x=>x.id===id);
+    DB.tasks.push({...t, id:Date.now()});
     save();
     render();
 }
@@ -246,16 +244,17 @@ function copy(id){
 /* ===== 期限チェック ===== */
 function isDanger(date){
     if(!date) return false;
-    const now=new Date();
-    const d=new Date(date);
-    const diff=(d-now)/(1000*60*60*24);
-    return diff <= 1; // 1日以内
+    const now = new Date();
+    const d = new Date(date);
+    const diff = (d - now)/(1000*60*60*24);
+    return diff <= 1;
 }
 
 /* ===== 描画 ===== */
 function render(){
 
-    const g=document.getElementById("genre");
+    /* ジャンル */
+    const g = document.getElementById("genre");
     g.innerHTML="";
     DB.genres.forEach(x=>{
         const o=document.createElement("option");
@@ -264,20 +263,19 @@ function render(){
         g.appendChild(o);
     });
 
+    /* アクティブ */
     const a=document.getElementById("active");
     a.innerHTML="";
 
     DB.tasks.forEach(t=>{
         const div=document.createElement("div");
 
-        let dangerClass = isDanger(t.date) ? "task danger" : "task";
-        div.className = dangerClass;
+        div.className = isDanger(t.date) ? "task danger" : "task";
 
         div.innerHTML=`
         <div>
-            <span class="genre">[${t.genre}]</span>
-            ${t.title}
-            <div class="mode">${t.mode} / ${t.date || "なし"}</div>
+            [${t.genre}] ${t.title}
+            <div class="sub">${t.mode} / ${t.date || "なし"}</div>
         </div>
         <div>
             <button onclick="done(${t.id})">✔</button>
@@ -287,6 +285,7 @@ function render(){
         a.appendChild(div);
     });
 
+    /* アーカイブ */
     const ar=document.getElementById("archive");
     ar.innerHTML="";
     DB.archive.forEach(t=>{
@@ -303,8 +302,11 @@ function render(){
 /* ===== 初期化 ===== */
 function init(){
     const d=new Date();
-    document.getElementById("date").value =
-        d.toISOString().split("T")[0];
+    const today=d.toISOString().split("T")[0];
+
+    const dateEl = document.getElementById("date");
+    if(dateEl) dateEl.value = today;
+
     render();
 }
 
