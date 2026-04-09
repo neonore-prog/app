@@ -5,15 +5,15 @@
 <title>NEON CORE: PRIME</title>
 <style>
 :root {
-    --bg: #030303;
-    --card: #0a0a0c;
+    --bg: #01010a;
+    --card: #0c0c1c;
     --cyan: #00f3ff;
-    --cyan-glow: rgba(0, 243, 255, 0.4);
-    --pink: #ff00ff;
-    --pink-glow: rgba(255, 0, 255, 0.3);
+    --magenta: #ff00ff;
+    --yellow: #f0ff00;
+    --green: #00ff88;
     --red: #ff1e56;
     --text: #e0e0e0;
-    --sub: #666;
+    --sub: #aaa;
 }
 
 body {
@@ -25,16 +25,14 @@ body {
     height: 100vh;
 }
 
-/* スタイリッシュな背景演出 */
 body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #030303 100%);
+    background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #01010a 100%);
     z-index: -1;
 }
 
-/* ナビゲーションバー */
 #nav {
     width: 70px;
     background: rgba(0, 0, 0, 0.8);
@@ -54,48 +52,37 @@ body::before {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s;
     font-size: 10px;
     font-weight: 900;
     color: var(--sub);
     letter-spacing: 1px;
 }
-
 .nav-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-.nav-btn.active {
-    background: var(--cyan);
-    color: #000;
-    box-shadow: 0 0 20px var(--cyan-glow);
-    border-color: var(--cyan);
-}
+.nav-btn.active { background: var(--cyan); color:#000; box-shadow:0 0 20px var(--cyan); border-color: var(--cyan); }
 
-/* メインセクション */
 #main {
     flex: 1;
     padding: 40px 60px;
     overflow-y: auto;
-    scrollbar-width: none;
 }
-#main::-webkit-scrollbar { display: none; }
 
 h2 {
     font-weight: 200;
-    font-size: 2.5rem;
-    letter-spacing: -1px;
-    margin: 0 0 40px 0;
+    font-size: 2rem;
+    margin: 0 0 30px 0;
     color: #fff;
 }
 
 .box {
     background: var(--card);
     border: 1px solid #1a1a1a;
-    padding: 30px;
+    padding: 20px;
     margin-bottom: 30px;
-    border-radius: 4px;
-    position: relative;
+    border-radius: 6px;
 }
 
-/* 入力エリアの洗練 */
+/* 入力 */
 .input-group {
     display: flex;
     gap: 10px;
@@ -107,119 +94,72 @@ input, select, textarea {
     background: #000;
     border: 1px solid #222;
     color: #fff;
-    padding: 12px 18px;
+    padding: 8px 12px;
     font-size: 14px;
     border-radius: 2px;
     transition: border 0.3s;
 }
-
-input:focus, select:focus {
-    border-color: var(--cyan);
-    outline: none;
-}
+input:focus, select:focus { border-color: var(--cyan); outline: none; }
 
 button {
     background: transparent;
-    border: 1px solid var(--pink);
-    color: var(--pink);
-    padding: 12px 24px;
+    border: 1px solid var(--magenta);
+    color: var(--magenta);
+    padding: 8px 16px;
     font-weight: bold;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 12px;
+    font-size: 11px;
     transition: all 0.3s;
 }
-
-button:hover {
-    background: var(--pink);
-    color: #000;
-    box-shadow: 0 0 25px var(--pink-glow);
-}
+button:hover { background: var(--magenta); color:#000; box-shadow:0 0 20px var(--magenta); }
 
 /* タスクアイテム */
 .task {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    margin: 12px 0;
-    background: #050505;
+    padding: 12px 16px;
+    margin: 8px 0;
     border: 1px solid #111;
-    transition: transform 0.2s;
+    border-radius: 4px;
+    transition: all 0.2s;
+    background: linear-gradient(135deg, #0a0a0a, #111122);
 }
+.task:hover { transform: translateX(3px); border-color: #333; }
 
-.task:hover {
-    border-color: #333;
-    transform: translateX(5px);
-}
+.task-info strong { font-size: 1rem; display:block; }
 
-.task.danger {
-    border-left: 4px solid var(--red);
-}
-
-.task-info strong {
-    font-size: 1.1rem;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.sub-text {
-    font-size: 11px;
-    color: var(--sub);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+.sub-text { font-size: 10px; color: var(--sub); }
 
 .genre-tag-small {
-    color: var(--cyan);
     font-size: 10px;
     font-weight: bold;
-    margin-right: 8px;
+    margin-right: 6px;
 }
+
+/* 警告タスク */
+.task.danger { border-left: 3px solid var(--red); }
 
 /* ジャンル編集 */
-#genre-edit {
-    display: flex;
-    gap: 8px;
-    margin: 20px 0;
-}
+#genre-edit { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+.genre-pill { background: #111; border:1px solid #222; padding:4px 10px; border-radius:12px; font-size:10px; color: var(--cyan); display:flex; align-items:center; }
+.del-x { margin-left:4px; color:var(--red); cursor:pointer; font-weight:bold; }
 
-.genre-pill {
-    background: #111;
-    border: 1px solid #222;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    color: var(--cyan);
-}
-
-.del-x {
-    margin-left: 8px;
-    color: var(--red);
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.archive { opacity: 0.3; filter: grayscale(1); }
+.archive { opacity:0.3; filter: grayscale(1); }
 
 </style>
 </head>
 
 <body>
-
 <div id="nav">
     <div class="nav-btn active" onclick="sw('t')">TASK</div>
     <div class="nav-btn" onclick="sw('s')">CORE</div>
 </div>
 
 <div id="main">
-
     <div id="sc-t">
-        <h2>NEON_APP//TERMINAL</h2>
-
+        <h2>NEON CORE: PRIME</h2>
         <div class="box">
             <div class="input-group">
                 <input id="title" placeholder="WHAT NEEDS TO BE DONE?" style="flex:1;">
@@ -232,32 +172,24 @@ button:hover {
                 <input type="date" id="date">
                 <button onclick="add()">PUSH</button>
             </div>
-
-            <div style="margin-top:30px; padding-top:20px; border-top:1px solid #1a1a1a;">
-                <div class="sub-text" style="margin-bottom:10px;">Genre Configuration</div>
-                <div id="genre-edit"></div>
-                <div class="input-group">
-                    <input id="new-genre-input" placeholder="NEW CATEGORY..." maxlength="20">
-                    <button onclick="addGenre()" style="border-color:var(--cyan); color:var(--cyan); padding:8px 15px;">Add</button>
-                </div>
+            <div id="genre-edit"></div>
+            <div class="input-group">
+                <input id="new-genre-input" placeholder="NEW CATEGORY..." maxlength="20">
+                <button onclick="addGenre()" style="border-color:var(--cyan); color:var(--cyan); padding:6px 12px;">Add</button>
             </div>
         </div>
 
-        <h3 class="sub-text" style="color:var(--cyan);">Active Operations</h3>
+        <h3 class="sub-text" style="color:var(--cyan);">Active Tasks</h3>
         <div id="active"></div>
-
-        <h3 class="sub-text" style="margin-top:50px;">Legacy Logs</h3>
-        <div id="archive"></div>
     </div>
 
     <div id="sc-s" style="display:none;">
         <h2>CORE_UPDATE</h2>
         <div class="box">
-            <textarea id="code" style="width:100%; height:400px; font-family: 'Consolas', monospace; border-color:#333;"></textarea>
-            <button onclick="update()" style="width:100%; margin-top:20px;">Deploy Changes</button>
+            <textarea id="code" style="width:100%; height:300px; font-family:'Consolas', monospace; border-color:#333;"></textarea>
+            <button onclick="update()" style="width:100%; margin-top:12px;">Deploy Changes</button>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -266,17 +198,16 @@ let DB;
 try { DB = JSON.parse(raw) || {}; } catch { DB = {}; }
 
 if(!DB.tasks) DB.tasks = [];
-if(!DB.archive) DB.archive = [];
 if(!DB.genres) DB.genres = ["Work","Personal","Hobby"];
 
-function save() { localStorage.setItem("NEON_DB", JSON.stringify(DB)); }
+function save(){ localStorage.setItem("NEON_DB", JSON.stringify(DB)); }
 
 function sw(s){
     document.getElementById("sc-t").style.display = s==="t" ? "block" : "none";
     document.getElementById("sc-s").style.display = s==="s" ? "block" : "none";
-    document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+    document.querySelectorAll(".nav-btn").forEach((btn, idx)=>{
         btn.classList.remove("active");
-        if((s==="t" && idx===0) || (s==="s" && idx===1)) btn.classList.add("active");
+        if((s==="t" && idx===0)||(s==="s" && idx===1)) btn.classList.add("active");
     });
 }
 
@@ -292,8 +223,7 @@ function add(){
         mode: document.getElementById("mode").value,
         date: document.getElementById("date").value
     });
-
-    tInput.value = "";
+    tInput.value="";
     save();
     render();
 }
@@ -302,7 +232,14 @@ function done(id){
     const t = DB.tasks.find(x=>x.id===id);
     if(!t) return;
     DB.tasks = DB.tasks.filter(x=>x.id!==id);
-    DB.archive.unshift(t);
+
+    // DAILY タスクは翌日追加
+    if(t.mode==="daily"){
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate()+1);
+        DB.tasks.push({...t, id:Date.now(), date: tomorrow.toISOString().split("T")[0]});
+    }
+
     save();
     render();
 }
@@ -313,10 +250,19 @@ function del(id){
     render();
 }
 
-function copy(id){
-    const t = DB.archive.find(x=>x.id===id);
-    if(!t) return;
-    DB.tasks.push({...t, id:Date.now()});
+function addGenre(){
+    const input = document.getElementById("new-genre-input");
+    const newGenre = input.value.trim();
+    if(!newGenre || DB.genres.includes(newGenre)) return;
+    DB.genres.push(newGenre);
+    input.value="";
+    save();
+    render();
+}
+
+function delGenre(genre){
+    if(!confirm(`Delete: ${genre}?`)) return;
+    DB.genres = DB.genres.filter(g => g!==genre);
     save();
     render();
 }
@@ -325,81 +271,50 @@ function isDanger(date){
     if(!date) return false;
     const now = new Date();
     const d = new Date(date);
-    return (d - now) / (1000*60*60*24) <= 1;
-}
-
-function addGenre(){
-    const input = document.getElementById("new-genre-input");
-    const newGenre = input.value.trim();
-    if(!newGenre || DB.genres.includes(newGenre)) return;
-    DB.genres.push(newGenre);
-    input.value = "";
-    save();
-    render();
-}
-
-function delGenre(genre){
-    if(!confirm(`Delete: ${genre}?`)) return;
-    DB.genres = DB.genres.filter(g => g !== genre);
-    save();
-    render();
+    return (d - now)/(1000*60*60*24)<=1;
 }
 
 function render(){
     const gSelect = document.getElementById("genre");
-    gSelect.innerHTML = "";
-    DB.genres.forEach(x => {
+    gSelect.innerHTML="";
+    DB.genres.forEach(x=>{
         const o = document.createElement("option");
-        o.value = x; o.textContent = x;
+        o.value=x; o.textContent=x;
         gSelect.appendChild(o);
     });
 
     const ge = document.getElementById("genre-edit");
-    ge.innerHTML = "";
-    DB.genres.forEach(genre => {
+    ge.innerHTML="";
+    DB.genres.forEach(genre=>{
         const div = document.createElement("div");
-        div.className = "genre-pill";
-        div.innerHTML = `${genre} <span class="del-x" onclick="delGenre('${genre}')">×</span>`;
+        div.className="genre-pill";
+        div.innerHTML=`${genre} <span class="del-x" onclick="delGenre('${genre}')">×</span>`;
         ge.appendChild(div);
     });
 
     const a = document.getElementById("active");
-    a.innerHTML = "";
-    DB.tasks.forEach(t => {
+    a.innerHTML="";
+    DB.tasks.forEach(t=>{
         const div = document.createElement("div");
-        div.className = isDanger(t.date) ? "task danger" : "task";
-        div.innerHTML = `
+        div.className = isDanger(t.date)?"task danger":"task";
+        div.innerHTML=`
             <div class="task-info">
                 <strong><span class="genre-tag-small">[${t.genre}]</span> ${t.title}</strong>
-                <span class="sub-text">${t.mode} / DUE: ${t.date || "NO_LIMIT"}</span>
+                <span class="sub-text">${t.mode} / DUE: ${t.date||"NO_LIMIT"}</span>
             </div>
             <div>
-                <button onclick="done(${t.id})" style="border-color:var(--cyan); color:var(--cyan); font-size:10px; padding:8px 15px;">Complete</button>
-                <button onclick="del(${t.id})" style="border-color:#333; color:#555; font-size:10px; padding:8px 15px;">Del</button>
+                <button onclick="done(${t.id})" style="border-color:var(--cyan); color:var(--cyan); font-size:9px; padding:5px 10px;">Complete</button>
+                <button onclick="del(${t.id})" style="border-color:#333; color:#555; font-size:9px; padding:5px 10px;">Del</button>
             </div>
         `;
         a.appendChild(div);
     });
-
-    const ar = document.getElementById("archive");
-    ar.innerHTML = "";
-    DB.archive.slice(0, 5).forEach(t => {
-        const div = document.createElement("div");
-        div.className = "task archive";
-        div.innerHTML = `
-            <div class="task-info">
-                <strong>[${t.genre}] ${t.title}</strong>
-            </div>
-            <button onclick="copy(${t.id})" style="font-size:10px; padding:8px 15px;">Restore</button>
-        `;
-        ar.appendChild(div);
-    });
 }
 
-function update() {
+function update(){
     const code = document.getElementById("code").value;
-    if(code.length > 100) {
-        const n = document.open("text/html", "replace");
+    if(code.length>100){
+        const n = document.open("text/html","replace");
         n.write(code);
         n.close();
     }
@@ -407,7 +322,7 @@ function update() {
 
 function init(){
     const d = new Date();
-    document.getElementById("date").value = d.toISOString().split("T")[0];
+    document.getElementById("date").value=d.toISOString().split("T")[0];
     render();
 }
 
