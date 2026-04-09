@@ -1,141 +1,394 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>CYBER PLOT GEN</title>
+<meta charset="UTF-8">
+<title>NEON CORE: ENHANCED</title>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root {
+    --bg: #050505;
+    --panel: #0d0d0d;
+    --cyan: #00f3ff;
+    --pink: #ff00ff;
+    --red: #ff0033;
+    --dim: #333;
+}
 
-  body {
-    margin:0; padding:0; height:100vh;
-    background:#050505;
-    font-family: 'Share Tech Mono', monospace, monospace;
-    display:flex; justify-content:center; align-items:center;
-    color:#eee;
-  }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--cyan);
+    font-family: 'Consolas', 'Monaco', 'Meiryo', monospace;
+    display: flex;
+    height: 100vh;
+}
 
-  .container {
-    position: relative;
-    background: #000;
-    padding: 30px 40px;
-    border: 3px solid #00f3ff;
-    border-radius: 10px;
-    box-shadow:
-      0 0 15px #00f3ff,
-      0 0 30px #ff00ff,
-      0 0 40px #00f3ff,
-      0 0 60px #ff00ff;
-    width: 380px;
-  }
-
-  /* 走査線エフェクト */
-  .container::before {
+/* 背景グリッド */
+body::before {
     content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: 
+        linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
     pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 255, 255, 0.1),
-      rgba(0, 255, 255, 0.1) 1px,
-      transparent 2px,
-      transparent 4px
-    );
-    animation: scanlineMove 5s linear infinite;
-    border-radius: 10px;
-  }
+    z-index: 0;
+}
 
-  @keyframes scanlineMove {
-    0% { background-position-y: 0; }
-    100% { background-position-y: 40px; }
-  }
+#nav {
+    width: 80px;
+    background: var(--panel);
+    border-right: 1px solid var(--cyan);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    z-index: 10;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+}
 
-  h1 {
-    font-size: 1.8rem;
-    text-align: center;
-    color: #a100ff;
-    text-shadow:
-      0 0 8px #a100ff,
-      0 0 15px #ff00ff;
-    margin-bottom: 30px;
-    letter-spacing: 0.2em;
-  }
-
-  .item {
-    margin-bottom: 22px;
-  }
-
-  .label {
+.nav-btn {
+    width: 60px; height: 60px;
+    border: 1px solid var(--cyan);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 14px;
+}
+
+.nav-btn:hover { background: rgba(0, 243, 255, 0.1); }
+.nav-btn.active {
+    background: var(--cyan);
+    color: #000;
+    box-shadow: 0 0 15px var(--cyan);
+}
+
+#main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    z-index: 5;
+    position: relative;
+}
+
+.box {
+    background: rgba(13, 13, 13, 0.9);
+    border: 1px solid var(--dim);
+    border-left: 4px solid var(--pink);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+h2, h3 { 
+    margin-top: 0; 
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 6px;
-    color: #eee;
-    text-shadow:
-      0 0 5px #00ffff;
-  }
+}
 
-  .value {
-    font-size: 1.1rem;
-    line-height: 1.3em;
-  }
+input, select, button, textarea {
+    background: #000;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 10px;
+    margin: 5px;
+    font-family: inherit;
+    outline: none;
+}
 
-  /* 各色ネオン */
-  .subject {
-    color: #ffa500;
-    text-shadow: 0 0 8px #ffa500, 0 0 15px #ffb733;
-  }
+button {
+    border-color: var(--pink);
+    color: var(--pink);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-  .event {
-    color: #ff00ff;
-    text-shadow: 0 0 8px #ff00ff, 0 0 20px #ff33ff;
-  }
+button:hover {
+    background: var(--pink);
+    color: #000;
+    box-shadow: 0 0 10px var(--pink);
+}
 
-  .objective {
-    color: #ffff00;
-    text-shadow: 0 0 8px #ffff00, 0 0 15px #fffb33;
-  }
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin: 10px 0;
+    background: #000;
+    border-left: 3px solid var(--cyan);
+    border-bottom: 1px solid #222;
+}
 
-  .blocker {
-    color: #00ff99;
-    text-shadow: 0 0 8px #00ff99, 0 0 15px #33ffbb;
-  }
+.danger {
+    border-left-color: var(--red);
+    color: var(--red);
+}
 
-  .termination {
-    color: #ff0044;
-    text-shadow: 0 0 8px #ff0044, 0 0 18px #ff4477;
-  }
+.sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.archive {
+    opacity: 0.4;
+    border-left-color: var(--dim);
+}
+
+/* ジャンル編集エリア */
+#genre-edit {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.genre-tag {
+    background: var(--cyan);
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.del-btn {
+    margin-left: 8px;
+    background: var(--red);
+    color: #fff;
+    border-radius: 50%;
+    width: 16px; height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+#new-genre-input { width: 150px; }
+
 </style>
 </head>
+
 <body>
-  <div class="container" role="main" aria-label="Cyber Plot Generator">
-    <h1>CYBER PLOT GEN</h1>
 
-    <div class="item">
-      <div class="label">SUBJECT / 主人公</div>
-      <div class="value subject">超ポジティブな料理部員</div>
+<div id="nav">
+    <div class="nav-btn active" onclick="sw('t')">TASK</div>
+    <div class="nav-btn" onclick="sw('s')">SYS</div>
+</div>
+
+<div id="main">
+
+    <div id="sc-t">
+        <h2 style="color:var(--pink);">TERMINAL: TASK_MANAGEMENT</h2>
+
+        <div class="box">
+            <input id="title" placeholder="ENTER TASK..." style="width: 250px;">
+            <select id="mode">
+                <option value="once">SINGLE</option>
+                <option value="daily">DAILY</option>
+                <option value="custom">ROUTINE</option>
+            </select>
+            <select id="genre"></select>
+            <input type="date" id="date">
+            <button onclick="add()">PUSH</button>
+
+            <div style="margin-top:20px; border-top: 1px solid #222; padding-top: 15px;">
+                <strong style="font-size: 0.8em; color: var(--pink);">GENRE_EDITOR</strong>
+                <div id="genre-edit"></div>
+                <input id="new-genre-input" placeholder="NEW GENRE..." maxlength="20">
+                <button id="add-genre-btn">REGISTER</button>
+            </div>
+        </div>
+
+        <div class="box" style="border-left-color: var(--cyan);">
+            <h3>ACTIVE_TASKS</h3>
+            <div id="active"></div>
+        </div>
+
+        <div class="box" style="border-left-color: var(--dim);">
+            <h3>HISTORY_LOG</h3>
+            <div id="archive"></div>
+        </div>
     </div>
 
-    <div class="item">
-      <div class="label">EVENT / きっかけ</div>
-      <div class="value event">弱小の部活に無理やり勧誘された</div>
+    <div id="sc-s" style="display:none;">
+        <h2 style="color:var(--pink);">SYSTEM_CORE</h2>
+        <div class="box">
+            <p style="font-size: 0.9em; color: #888;">UPDATE SOURCE CODE:</p>
+            <textarea id="code" style="width:100%; height:300px; font-family: monospace;"></textarea>
+            <button onclick="update()" style="width: 100%; margin-top: 15px;">EXECUTE_UPDATE</button>
+        </div>
     </div>
 
-    <div class="item">
-      <div class="label">OBJECTIVE / 目的</div>
-      <div class="value objective">過去の自分にメッセージを伝える</div>
-    </div>
+</div>
 
-    <div class="item">
-      <div class="label">BLOCKER / 障害</div>
-      <div class="value blocker">初戦の相手が全国王者の怪物だった</div>
-    </div>
+<script>
+let raw = localStorage.getItem("NEON_DB");
+let DB;
+try { DB = JSON.parse(raw) || {}; } catch { DB = {}; }
 
-    <div class="item">
-      <div class="label">TERMINATION / 結末</div>
-      <div class="value termination">なぜか全員でラインダンスを踊る羽目になる</div>
-    </div>
-  </div>
+if(!DB.tasks) DB.tasks = [];
+if(!DB.archive) DB.archive = [];
+if(!DB.genres) DB.genres = ["Work","Personal","Hobby"];
+
+function save() { localStorage.setItem("NEON_DB", JSON.stringify(DB)); }
+
+function sw(s){
+    document.getElementById("sc-t").style.display = s==="t" ? "block" : "none";
+    document.getElementById("sc-s").style.display = s==="s" ? "block" : "none";
+    document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+        btn.classList.remove("active");
+        if((s==="t" && idx===0) || (s==="s" && idx===1)) btn.classList.add("active");
+    });
+}
+
+function add(){
+    const tInput = document.getElementById("title");
+    const title = tInput.value.trim();
+    if(!title) return;
+
+    DB.tasks.push({
+        id: Date.now(),
+        title,
+        genre: document.getElementById("genre").value,
+        mode: document.getElementById("mode").value,
+        date: document.getElementById("date").value
+    });
+
+    tInput.value = "";
+    save();
+    render();
+}
+
+function done(id){
+    const t = DB.tasks.find(x=>x.id===id);
+    if(!t) return;
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
+    DB.archive.unshift(t);
+    save();
+    render();
+}
+
+function del(id){
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
+    save();
+    render();
+}
+
+function copy(id){
+    const t = DB.archive.find(x=>x.id===id);
+    if(!t) return;
+    DB.tasks.push({...t, id:Date.now()});
+    save();
+    render();
+}
+
+function isDanger(date){
+    if(!date) return false;
+    const now = new Date();
+    const d = new Date(date);
+    return (d - now) / (1000*60*60*24) <= 1;
+}
+
+function addGenre(){
+    const input = document.getElementById("new-genre-input");
+    const newGenre = input.value.trim();
+    if(!newGenre || DB.genres.includes(newGenre)) return;
+    DB.genres.push(newGenre);
+    input.value = "";
+    save();
+    render();
+}
+
+function delGenre(genre){
+    if(!confirm(`Delete Genre: "${genre}"?`)) return;
+    DB.genres = DB.genres.filter(g => g !== genre);
+    save();
+    render();
+}
+
+function render(){
+    const gSelect = document.getElementById("genre");
+    gSelect.innerHTML = "";
+    DB.genres.forEach(x => {
+        const o = document.createElement("option");
+        o.value = x; o.textContent = x;
+        gSelect.appendChild(o);
+    });
+
+    const ge = document.getElementById("genre-edit");
+    ge.innerHTML = "";
+    DB.genres.forEach(genre => {
+        const span = document.createElement("span");
+        span.className = "genre-tag";
+        span.textContent = genre;
+        const dBtn = document.createElement("span");
+        dBtn.className = "del-btn";
+        dBtn.textContent = "×";
+        dBtn.onclick = () => delGenre(genre);
+        span.appendChild(dBtn);
+        ge.appendChild(span);
+    });
+
+    const a = document.getElementById("active");
+    a.innerHTML = "";
+    DB.tasks.forEach(t => {
+        const div = document.createElement("div");
+        div.className = isDanger(t.date) ? "task danger" : "task";
+        div.innerHTML = `
+            <div>
+                <span style="color:var(--pink); font-size:0.8em;">[${t.genre}]</span> <strong>${t.title}</strong>
+                <div class="sub">${t.mode.toUpperCase()} / DUE: ${t.date || "---"}</div>
+            </div>
+            <div>
+                <button onclick="done(${t.id})" style="border-color:var(--cyan); color:var(--cyan);">DONE</button>
+                <button onclick="del(${t.id})">DEL</button>
+            </div>
+        `;
+        a.appendChild(div);
+    });
+
+    const ar = document.getElementById("archive");
+    ar.innerHTML = "";
+    DB.archive.slice(0, 10).forEach(t => {
+        const div = document.createElement("div");
+        div.className = "task archive";
+        div.innerHTML = `
+            <div>[${t.genre}] ${t.title}</div>
+            <button onclick="copy(${t.id})">RE-PUSH</button>
+        `;
+        ar.appendChild(div);
+    });
+}
+
+function update() {
+    const code = document.getElementById("code").value;
+    if(code.length > 100) {
+        const n = document.open("text/html", "replace");
+        n.write(code);
+        n.close();
+    }
+}
+
+function init(){
+    const d = new Date();
+    document.getElementById("date").value = d.toISOString().split("T")[0];
+    render();
+}
+
+document.getElementById("add-genre-btn").onclick = addGenre;
+init();
+</script>
 </body>
 </html>
