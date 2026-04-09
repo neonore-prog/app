@@ -14,18 +14,6 @@ body{
     font-family:monospace;
 }
 
-/* グリッド */
-body::before{
-    content:"";
-    position:fixed;
-    width:100%;
-    height:100%;
-    background:
-    linear-gradient(#00f3ff11 1px,transparent 1px),
-    linear-gradient(90deg,#00f3ff11 1px,transparent 1px);
-    background-size:40px 40px;
-}
-
 /* ナビ */
 #nav{
     width:90px;
@@ -45,13 +33,11 @@ body::before{
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    font-size:12px;
 }
 
 .nav-btn.active{
     background:#00f3ff;
     color:#000;
-    box-shadow:0 0 15px #00f3ff;
 }
 
 /* メイン */
@@ -60,16 +46,14 @@ body::before{
     padding:20px;
 }
 
-/* ボックス */
+/* UI */
 .box{
     background:#0d0d0d;
-    border:1px solid #222;
-    border-left:4px solid #ff00ff;
     padding:15px;
     margin-bottom:15px;
+    border-left:4px solid #ff00ff;
 }
 
-/* 入力 */
 input,select,button{
     background:#000;
     border:1px solid #00f3ff;
@@ -83,23 +67,12 @@ button:hover{
     color:#000;
 }
 
-/* タスク */
 .task{
     display:flex;
     justify-content:space-between;
     padding:8px;
     margin:5px 0;
     border-left:2px solid #00f3ff;
-    background:#050505;
-}
-
-.archive{
-    opacity:0.5;
-}
-
-.small{
-    font-size:12px;
-    color:#999;
 }
 </style>
 </head>
@@ -114,7 +87,6 @@ button:hover{
 <div id="main">
 
 <div id="sc-t">
-
 <h2>TASK</h2>
 
 <div class="box">
@@ -142,23 +114,14 @@ button:hover{
 <h3>ARCHIVE</h3>
 <div id="archive"></div>
 </div>
-
 </div>
 
 <div id="sc-s" style="display:none">
 <h2>SYSTEM</h2>
-
-<div class="box">
-アラーム:
-<input type="time" id="alarmTime">
-<button onclick="saveAlarm()">SAVE</button>
-</div>
-
 <div class="box">
 <textarea id="code" style="width:100%;height:200px;"></textarea>
 <button onclick="update()">UPDATE</button>
 </div>
-
 </div>
 
 </div>
@@ -166,147 +129,122 @@ button:hover{
 <script>
 
 /* ===== DB ===== */
-let DB = JSON.parse(localStorage.getItem("NEON_DB")) || {
-tasks:[],
-archive:[],
-genres:["Work","Personal","Hobby"],
-alarm:"20:00"
-};
+let DB = JSON.parse(localStorage.getItem("NEON_DB") || "{}");
 
+if(!DB.tasks){
+    DB = {
+        tasks:[],
+        archive:[],
+        genres:["Work","Personal","Hobby"],
+        alarm:"20:00"
+    };
+}
+
+/* ===== 保存 ===== */
 function save(){
-localStorage.setItem("NEON_DB",JSON.stringify(DB));
+    localStorage.setItem("NEON_DB", JSON.stringify(DB));
 }
 
 /* ===== 画面切替 ===== */
 function sw(s){
-document.getElementById("sc-t").style.display = s==="t"?"block":"none";
-document.getElementById("sc-s").style.display = s==="s"?"block":"none";
+    document.getElementById("sc-t").style.display = s==="t"?"block":"none";
+    document.getElementById("sc-s").style.display = s==="s"?"block":"none";
 }
 
-/* ===== タスク追加 ===== */
+/* ===== 追加 ===== */
 function add(){
-let t = document.getElementById("title").value;
-if(!t) return;
+    const title = document.getElementById("title").value;
+    if(!title) return;
 
-DB.tasks.push({
-id:Date.now(),
-title:t,
-genre:document.getElementById("genre").value,
-mode:document.getElementById("mode").value,
-date:document.getElementById("date").value
-});
+    DB.tasks.push({
+        id:Date.now(),
+        title:title,
+        genre:document.getElementById("genre").value,
+        mode:document.getElementById("mode").value,
+        date:document.getElementById("date").value
+    });
 
-document.getElementById("title").value="";
-save();
-render();
+    document.getElementById("title").value="";
+    save();
+    render();
 }
 
-/* ===== 完了（アーカイブ） ===== */
+/* ===== 完了 ===== */
 function done(id){
-let t = DB.tasks.find(x=>x.id===id);
-DB.tasks = DB.tasks.filter(x=>x.id!==id);
-DB.archive.push(t);
-save();
-render();
+    const t = DB.tasks.find(x=>x.id===id);
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
+    DB.archive.push(t);
+    save();
+    render();
 }
 
-/* ===== 削除（完全削除） ===== */
+/* ===== 削除 ===== */
 function del(id){
-DB.tasks = DB.tasks.filter(x=>x.id!==id);
-save();
-render();
+    DB.tasks = DB.tasks.filter(x=>x.id!==id);
+    save();
+    render();
 }
 
 /* ===== コピー ===== */
 function copy(id){
-let t = DB.archive.find(x=>x.id===id);
-DB.tasks.push({...t,id:Date.now()});
-save();
-render();
+    const t = DB.archive.find(x=>x.id===id);
+    DB.tasks.push({...t, id:Date.now()});
+    save();
+    render();
 }
 
 /* ===== 描画 ===== */
 function render(){
 
-/* ジャンル */
-let g=document.getElementById("genre");
-g.innerHTML="";
-DB.genres.forEach(x=>{
-let o=document.createElement("option");
-o.value=x;o.text=x;
-g.appendChild(o);
-});
+    /* ジャンル */
+    const g=document.getElementById("genre");
+    g.innerHTML="";
+    DB.genres.forEach(x=>{
+        const o=document.createElement("option");
+        o.value=x;
+        o.textContent=x;
+        g.appendChild(o);
+    });
 
-/* アクティブ */
-let a=document.getElementById("active");
-a.innerHTML="";
-DB.tasks.forEach(t=>{
-a.innerHTML+=`
-<div class="task">
-<div>
-[${t.genre}] ${t.title}
-<div class="small">${t.mode} / ${t.date || "日付なし"}</div>
-</div>
-<div>
-<button onclick="done(${t.id})">✔</button>
-<button onclick="del(${t.id})" style="color:#ff00ff;border-color:#ff00ff">X</button>
-</div>
-</div>`;
-});
+    /* アクティブ */
+    const a=document.getElementById("active");
+    a.innerHTML="";
+    DB.tasks.forEach(t=>{
+        const div=document.createElement("div");
+        div.className="task";
 
-/* アーカイブ */
-let ar=document.getElementById("archive");
-ar.innerHTML="";
-DB.archive.forEach(t=>{
-ar.innerHTML+=`
-<div class="task archive">
-<div>[${t.genre}] ${t.title}</div>
-<div>
-<button onclick="copy(${t.id})">COPY</button>
-</div>
-</div>`;
-});
+        div.innerHTML=`
+        <div>[${t.genre}] ${t.title}</div>
+        <div>
+        <button onclick="done(${t.id})">✔</button>
+        <button onclick="del(${t.id})">X</button>
+        </div>
+        `;
+        a.appendChild(div);
+    });
 
-/* アラーム */
-document.getElementById("alarmTime").value = DB.alarm;
-}
-
-/* ===== アラーム ===== */
-setInterval(()=>{
-let now=new Date();
-let t=now.toTimeString().slice(0,5);
-if(t===DB.alarm){
-if(Notification.permission==="granted"){
-new Notification("TASK ALERT");
-}else{
-Notification.requestPermission();
-}
-}
-},10000);
-
-function saveAlarm(){
-DB.alarm=document.getElementById("alarmTime").value;
-save();
-}
-
-/* ===== 更新 ===== */
-function update(){
-let c=document.getElementById("code").value;
-if(c.length>50){
-document.open();
-document.write(c);
-document.close();
-}
+    /* アーカイブ */
+    const ar=document.getElementById("archive");
+    ar.innerHTML="";
+    DB.archive.forEach(t=>{
+        const div=document.createElement("div");
+        div.className="task";
+        div.innerHTML=`
+        <div>[${t.genre}] ${t.title}</div>
+        <button onclick="copy(${t.id})">COPY</button>
+        `;
+        ar.appendChild(div);
+    });
 }
 
 /* ===== 初期化 ===== */
 function init(){
-/* 今日の日付をデフォルト */
-let d=new Date();
-let today=d.toISOString().split("T")[0];
-document.getElementById("date").value=today;
+    const d = new Date();
+    const today = d.toISOString().split("T")[0];
+    const dateInput = document.getElementById("date");
+    if(dateInput) dateInput.value = today;
 
-render();
+    render();
 }
 
 init();
