@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>NEON CORE</title>
+<title>NEON CORE with Genre Edit</title>
 
 <style>
 body{
@@ -13,8 +13,6 @@ body{
     display:flex;
     height:100vh;
 }
-
-/* 軽いグリッド */
 body::before{
     content:"";
     position:fixed;
@@ -27,7 +25,6 @@ body::before{
     pointer-events:none;
 }
 
-/* ナビ */
 #nav{
     width:90px;
     background:#0a0a0a;
@@ -53,13 +50,12 @@ body::before{
     color:#000;
 }
 
-/* メイン */
 #main{
     flex:1;
     padding:20px;
+    overflow-y: auto;
 }
 
-/* ボックス */
 .box{
     background:#0d0d0d;
     border:1px solid #222;
@@ -68,7 +64,6 @@ body::before{
     margin-bottom:15px;
 }
 
-/* 入力 */
 input,select,button{
     background:#000;
     border:1px solid #00f3ff;
@@ -77,7 +72,6 @@ input,select,button{
     margin:3px;
 }
 
-/* ボタン */
 button{
     border-color:#ff00ff;
     color:#ff00ff;
@@ -88,7 +82,6 @@ button:hover{
     color:#000;
 }
 
-/* タスク */
 .task{
     display:flex;
     justify-content:space-between;
@@ -97,21 +90,78 @@ button:hover{
     border-left:3px solid #00f3ff;
 }
 
-/* 危険（期限近い） */
 .danger{
     border-left:3px solid #ff0033;
     color:#ff0033;
 }
 
-/* 小テキスト */
 .sub{
     font-size:12px;
     color:#888;
 }
 
-/* アーカイブ */
 .archive{
     opacity:0.5;
+}
+
+/* ジャンル編集用 */
+#genre-edit {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.genre-tag {
+    background: #00f3ff;
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+    position: relative;
+}
+
+.genre-tag .del-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ff0033;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    color: #fff;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+}
+
+#new-genre-input {
+    background: #000;
+    border: 1px solid #00f3ff;
+    color: #00f3ff;
+    padding: 5px 8px;
+    font-size: 14px;
+    width: 130px;
+}
+
+#add-genre-btn {
+    border: 1px solid #ff00ff;
+    color: #ff00ff;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+#add-genre-btn:hover {
+    background: #ff00ff;
+    color: #000;
+    box-shadow: 0 0 8px #ff00ff;
 }
 </style>
 </head>
@@ -119,196 +169,248 @@ button:hover{
 <body>
 
 <div id="nav">
-<div class="nav-btn active" onclick="sw('t')">TASK</div>
-<div class="nav-btn" onclick="sw('s')">SYS</div>
+    <div class="nav-btn active" onclick="sw('t')">TASK</div>
+    <div class="nav-btn" onclick="sw('s')">SYS</div>
 </div>
 
 <div id="main">
 
-<div id="sc-t">
-<h2 style="color:#ff00ff;">TASK</h2>
+    <div id="sc-t">
+        <h2 style="color:#ff00ff;">TASK</h2>
 
-<div class="box">
-<input id="title" placeholder="task">
+        <div class="box">
+            <input id="title" placeholder="task">
 
-<select id="mode">
-<option value="once">単発</option>
-<option value="daily">毎日</option>
-<option value="custom">定期</option>
-</select>
+            <select id="mode">
+                <option value="once">単発</option>
+                <option value="daily">毎日</option>
+                <option value="custom">定期</option>
+            </select>
 
-<select id="genre"></select>
+            <select id="genre"></select>
 
-<input type="date" id="date">
+            <input type="date" id="date">
 
-<button onclick="add()">ADD</button>
-</div>
+            <button onclick="add()">ADD</button>
 
-<div class="box">
-<h3>ACTIVE</h3>
-<div id="active"></div>
-</div>
+            <!-- ジャンル編集 -->
+            <div id="genre-edit-container" style="margin-top:10px;">
+                <strong>ジャンル編集</strong>
+                <div id="genre-edit"></div>
+                <input id="new-genre-input" placeholder="新しいジャンル" maxlength="20">
+                <button id="add-genre-btn">追加</button>
+            </div>
+        </div>
 
-<div class="box">
-<h3>ARCHIVE</h3>
-<div id="archive"></div>
-</div>
+        <div class="box">
+            <h3>ACTIVE</h3>
+            <div id="active"></div>
+        </div>
 
-</div>
+        <div class="box">
+            <h3>ARCHIVE</h3>
+            <div id="archive"></div>
+        </div>
+    </div>
 
-<div id="sc-s" style="display:none">
-<h2 style="color:#ff00ff;">SYSTEM</h2>
+    <div id="sc-s" style="display:none;">
+        <h2 style="color:#ff00ff;">SYSTEM</h2>
 
-<div class="box">
-<textarea id="code" style="width:100%;height:200px;background:#000;color:#0f0;"></textarea>
-<button onclick="update()">UPDATE</button>
-</div>
-
-</div>
+        <div class="box">
+            <textarea id="code" style="width:100%;height:200px;background:#000;color:#0f0;"></textarea>
+            <button onclick="update()">UPDATE</button>
+        </div>
+    </div>
 
 </div>
 
 <script>
-
-/* ===== DB安全読み込み ===== */
+/* ==== DB 初期化＆安全読み込み ==== */
 let raw = localStorage.getItem("NEON_DB");
 let DB;
-
 try{
     DB = JSON.parse(raw) || {};
 }catch{
     DB = {};
 }
+if(!DB.tasks) DB.tasks = [];
+if(!DB.archive) DB.archive = [];
+if(!DB.genres) DB.genres = ["Work","Personal","Hobby"];
 
-if(!DB.tasks){
-    DB = {
-        tasks:[],
-        archive:[],
-        genres:["Work","Personal","Hobby"]
-    };
-}
-
-/* ===== 保存 ===== */
+/* ==== 保存 ==== */
 function save(){
     localStorage.setItem("NEON_DB", JSON.stringify(DB));
 }
 
-/* ===== 画面切替 ===== */
+/* ==== 画面切替 ==== */
 function sw(s){
-    document.getElementById("sc-t").style.display = s==="t"?"block":"none";
-    document.getElementById("sc-s").style.display = s==="s"?"block":"none";
+    document.getElementById("sc-t").style.display = s==="t" ? "block" : "none";
+    document.getElementById("sc-s").style.display = s==="s" ? "block" : "none";
+    document.querySelectorAll(".nav-btn").forEach(btn=>{
+        btn.classList.remove("active");
+    });
+    if(s==="t") document.querySelector(".nav-btn:nth-child(1)").classList.add("active");
+    else if(s==="s") document.querySelector(".nav-btn:nth-child(2)").classList.add("active");
 }
 
-/* ===== 追加 ===== */
+/* ==== 追加 ==== */
 function add(){
-    const title = document.getElementById("title").value;
-    if(!title) return;
+    const title = document.getElementById("title").value.trim();
+    if(!title){
+        alert("タスク内容を入力してください");
+        return;
+    }
 
     DB.tasks.push({
-        id:Date.now(),
-        title:title,
-        genre:document.getElementById("genre").value,
-        mode:document.getElementById("mode").value,
-        date:document.getElementById("date").value
+        id: Date.now(),
+        title,
+        genre: document.getElementById("genre").value,
+        mode: document.getElementById("mode").value,
+        date: document.getElementById("date").value
     });
 
-    document.getElementById("title").value="";
+    document.getElementById("title").value = "";
     save();
     render();
 }
 
-/* ===== 完了 ===== */
+/* ==== 完了（アーカイブに移動） ==== */
 function done(id){
     const t = DB.tasks.find(x=>x.id===id);
+    if(!t) return;
     DB.tasks = DB.tasks.filter(x=>x.id!==id);
     DB.archive.push(t);
     save();
     render();
 }
 
-/* ===== 削除 ===== */
+/* ==== 削除 ==== */
 function del(id){
     DB.tasks = DB.tasks.filter(x=>x.id!==id);
     save();
     render();
 }
 
-/* ===== コピー ===== */
+/* ==== コピー ==== */
 function copy(id){
     const t = DB.archive.find(x=>x.id===id);
+    if(!t) return;
     DB.tasks.push({...t, id:Date.now()});
     save();
     render();
 }
 
-/* ===== 期限チェック ===== */
+/* ==== 期限チェック ==== */
 function isDanger(date){
     if(!date) return false;
     const now = new Date();
     const d = new Date(date);
-    const diff = (d - now)/(1000*60*60*24);
+    const diff = (d - now) / (1000*60*60*24);
     return diff <= 1;
 }
 
-/* ===== 描画 ===== */
-function render(){
+/* ==== ジャンル追加 ==== */
+function addGenre(){
+    const input = document.getElementById("new-genre-input");
+    const newGenre = input.value.trim();
+    if(!newGenre){
+        alert("ジャンル名を入力してください");
+        return;
+    }
+    if(DB.genres.includes(newGenre)){
+        alert("そのジャンルは既に存在します");
+        return;
+    }
+    DB.genres.push(newGenre);
+    input.value = "";
+    save();
+    render();
+}
 
-    /* ジャンル */
+/* ==== ジャンル削除 ==== */
+function delGenre(genre){
+    if(!confirm(`ジャンル「${genre}」を削除しますか？\n※既存タスクのタグは消えません`)){
+        return;
+    }
+    DB.genres = DB.genres.filter(g => g !== genre);
+    save();
+    render();
+}
+
+/* ==== 描画 ==== */
+function render(){
+    // ジャンルセレクト
     const g = document.getElementById("genre");
-    g.innerHTML="";
+    g.innerHTML = "";
     DB.genres.forEach(x=>{
-        const o=document.createElement("option");
-        o.value=x;
-        o.textContent=x;
+        const o = document.createElement("option");
+        o.value = x;
+        o.textContent = x;
         g.appendChild(o);
     });
 
-    /* アクティブ */
-    const a=document.getElementById("active");
-    a.innerHTML="";
+    // ジャンル編集表示
+    const ge = document.getElementById("genre-edit");
+    ge.innerHTML = "";
+    DB.genres.forEach(genre=>{
+        const span = document.createElement("span");
+        span.className = "genre-tag";
+        span.textContent = genre;
 
+        const delBtn = document.createElement("span");
+        delBtn.className = "del-btn";
+        delBtn.textContent = "×";
+        delBtn.title = `ジャンル「${genre}」を削除`;
+        delBtn.onclick = () => delGenre(genre);
+
+        span.appendChild(delBtn);
+        ge.appendChild(span);
+    });
+
+    // タスク アクティブ
+    const a = document.getElementById("active");
+    a.innerHTML = "";
     DB.tasks.forEach(t=>{
-        const div=document.createElement("div");
-
+        const div = document.createElement("div");
         div.className = isDanger(t.date) ? "task danger" : "task";
-
-        div.innerHTML=`
-        <div>
-            [${t.genre}] ${t.title}
-            <div class="sub">${t.mode} / ${t.date || "なし"}</div>
-        </div>
-        <div>
-            <button onclick="done(${t.id})">✔</button>
-            <button onclick="del(${t.id})">X</button>
-        </div>
+        div.innerHTML = `
+            <div>
+                [${t.genre}] ${t.title}
+                <div class="sub">${t.mode} / ${t.date || "なし"}</div>
+            </div>
+            <div>
+                <button onclick="done(${t.id})">✔</button>
+                <button onclick="del(${t.id})">X</button>
+            </div>
         `;
         a.appendChild(div);
     });
 
-    /* アーカイブ */
-    const ar=document.getElementById("archive");
-    ar.innerHTML="";
+    // タスク アーカイブ
+    const ar = document.getElementById("archive");
+    ar.innerHTML = "";
     DB.archive.forEach(t=>{
-        const div=document.createElement("div");
-        div.className="task archive";
-        div.innerHTML=`
-        <div>[${t.genre}] ${t.title}</div>
-        <button onclick="copy(${t.id})">COPY</button>
+        const div = document.createElement("div");
+        div.className = "task archive";
+        div.innerHTML = `
+            <div>[${t.genre}] ${t.title}</div>
+            <button onclick="copy(${t.id})">COPY</button>
         `;
         ar.appendChild(div);
     });
 }
 
-/* ===== 初期化 ===== */
+/* ==== 初期化 ==== */
 function init(){
-    const d=new Date();
-    const today=d.toISOString().split("T")[0];
-
+    const d = new Date();
+    const today = d.toISOString().split("T")[0];
     const dateEl = document.getElementById("date");
     if(dateEl) dateEl.value = today;
-
     render();
 }
+
+/* ==== イベント登録 ==== */
+document.getElementById("add-genre-btn").onclick = addGenre;
 
 init();
 
