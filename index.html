@@ -142,7 +142,7 @@ button:hover{
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
-        <h3 class="sub-text" style="color:var(--accent);">Active Tasks (Sorted by Due Date)</h3>
+        <h3 class="sub-text" style="color:var(--accent);">Active Tasks (Auto-Recurring Enabled)</h3>
         <div id="active"></div>
         <h3 class="sub-text" style="margin-top:30px;">Completed Tasks</h3>
         <div id="done"></div>
@@ -191,9 +191,39 @@ function add(){
     render();
 }
 
+// 次の予定日を計算する関数
+function getNextDate(currentDateStr, mode) {
+    let date = currentDateStr ? new Date(currentDateStr) : new Date();
+    if (isNaN(date.getTime())) date = new Date();
+
+    if (mode === 'daily') {
+        date.setDate(date.getDate() + 1);
+    } else if (mode === 'weekdays') {
+        do {
+            date.setDate(date.getDate() + 1);
+        } while (date.getDay() === 0 || date.getDay() === 6); // 日(0)と土(6)をスキップ
+    } else if (mode === 'monthly') {
+        date.setMonth(date.getMonth() + 1);
+    }
+    return date.toISOString().split('T')[0];
+}
+
 function doneTask(id){
     const t=DB.tasks.find(x=>x.id===id);
     if(!t)return;
+
+    // リピート設定がある場合、次のタスクを予約
+    if (t.mode !== 'once') {
+        const nextDate = getNextDate(t.date, t.mode);
+        DB.tasks.push({
+            id: Date.now() + 1, // 重複回避
+            title: t.title,
+            mode: t.mode,
+            genre: t.genre,
+            date: nextDate
+        });
+    }
+
     DB.tasks=DB.tasks.filter(x=>x.id!==id);
     DB.done.unshift({...t, completedAt: Date.now()});
     save();
@@ -229,7 +259,7 @@ function copyDone(id){
         title: t.title,
         mode: t.mode,
         genre: t.genre,
-        date: document.getElementById("date").value // 今日の日付でコピー
+        date: new Date().toISOString().split('T')[0]
     });
     save();
     render();
@@ -247,13 +277,12 @@ function addGenre(){
 
 function delGenre(g){
     if(!confirm(`Delete genre: ${g}?`))return;
-    DB.genres=DB.genres.filter(x!==g);
+    DB.genres=DB.genres.filter(x=>x!==g);
     save();
     render();
 }
 
 function render(){
-    // ジャンル選択の更新
     const gSelect=document.getElementById("genre");
     const currentGenre = gSelect.value;
     gSelect.innerHTML="";
@@ -276,7 +305,6 @@ function render(){
         ge.appendChild(div);
     });
 
-    // 期限順にソートして描画
     const a=document.getElementById("active");
     a.innerHTML="";
     const sortedTasks = [...DB.tasks].sort((a, b) => {
@@ -302,7 +330,6 @@ function render(){
         a.appendChild(div);
     });
 
-    // 完了済みタスクの描画（コピー機能追加）
     const d=document.getElementById("done");
     d.innerHTML="";
     DB.done.forEach(t=>{
@@ -315,7 +342,7 @@ function render(){
                 <span class="sub-text">COMPLETED</span>
             </div>
             <div>
-                <button onclick="copyDone(${t.id})" title="Copy to Active">Copy</button>
+                <button onclick="copyDone(${t.id})">Copy</button>
                 <button onclick="restoreDone(${t.id})">Restore</button>
                 <button onclick="delDone(${t.id})">Del</button>
             </div>
