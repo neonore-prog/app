@@ -142,9 +142,9 @@ button:hover{
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
-        <h3 class="sub-text" style="color:var(--accent);">Active Tasks (Auto-Recurring Enabled)</h3>
+        <h3 class="sub-text" style="color:var(--accent);">Active Tasks (Recurring tasks auto-cleanup)</h3>
         <div id="active"></div>
-        <h3 class="sub-text" style="margin-top:30px;">Completed Tasks</h3>
+        <h3 class="sub-text" style="margin-top:30px;">Completed Tasks (ONCE only)</h3>
         <div id="done"></div>
     </div>
     <div id="sc-s" style="display:none;">
@@ -191,7 +191,6 @@ function add(){
     render();
 }
 
-// 次の予定日を計算する関数
 function getNextDate(currentDateStr, mode) {
     let date = currentDateStr ? new Date(currentDateStr) : new Date();
     if (isNaN(date.getTime())) date = new Date();
@@ -201,7 +200,7 @@ function getNextDate(currentDateStr, mode) {
     } else if (mode === 'weekdays') {
         do {
             date.setDate(date.getDate() + 1);
-        } while (date.getDay() === 0 || date.getDay() === 6); // 日(0)と土(6)をスキップ
+        } while (date.getDay() === 0 || date.getDay() === 6);
     } else if (mode === 'monthly') {
         date.setMonth(date.getMonth() + 1);
     }
@@ -212,20 +211,23 @@ function doneTask(id){
     const t=DB.tasks.find(x=>x.id===id);
     if(!t)return;
 
-    // リピート設定がある場合、次のタスクを予約
+    // リピート設定がある場合
     if (t.mode !== 'once') {
         const nextDate = getNextDate(t.date, t.mode);
         DB.tasks.push({
-            id: Date.now() + 1, // 重複回避
+            id: Date.now() + 1,
             title: t.title,
             mode: t.mode,
             genre: t.genre,
             date: nextDate
         });
+        // 繰り返しタスクは履歴に入れない
+    } else {
+        // ONCEのみ履歴に保存
+        DB.done.unshift({...t, completedAt: Date.now()});
     }
 
     DB.tasks=DB.tasks.filter(x=>x.id!==id);
-    DB.done.unshift({...t, completedAt: Date.now()});
     save();
     render();
 }
