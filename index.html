@@ -8,8 +8,8 @@
     --bg: #0a0a0a;
     --text: #e0e0e0;
     --sub: #666;
+    --accent: #0ff;
 }
-
 body {
     margin:0;
     background: var(--bg);
@@ -18,7 +18,6 @@ body {
     display:flex;
     height:100vh;
 }
-
 #nav{
     width:70px;
     background:#111;
@@ -28,7 +27,6 @@ body {
     align-items:center;
     padding-top:30px;
 }
-
 .nav-btn{
     width:44px;height:44px;
     border:1px solid #333;
@@ -42,22 +40,18 @@ body {
     font-weight:900;
     letter-spacing:1px;
 }
-
-.nav-btn.active{border-color:#0ff;color:#0ff;}
-
+.nav-btn.active{border-color:var(--accent);color:var(--accent);}
 #main{
     flex:1;
     padding:30px 40px;
     overflow-y:auto;
 }
-
 h2{
     font-weight:200;
     font-size:2rem;
     margin:0 0 30px 0;
     color:#fff;
 }
-
 .box{
     background:#111;
     border:1px solid #222;
@@ -65,14 +59,12 @@ h2{
     margin-bottom:20px;
     border-radius:4px;
 }
-
 .input-group{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
     align-items:center;
 }
-
 input, select, textarea{
     background:#000;
     border:1px solid #222;
@@ -81,7 +73,6 @@ input, select, textarea{
     font-size:14px;
     border-radius:2px;
 }
-
 button{
     background:transparent;
     border:1px solid #555;
@@ -90,12 +81,10 @@ button{
     font-size:11px;
     cursor:pointer;
 }
-
 button:hover{
-    border-color:#0ff;
-    color:#0ff;
+    border-color:var(--accent);
+    color:var(--accent);
 }
-
 .task{
     display:flex;
     justify-content:space-between;
@@ -108,42 +97,40 @@ button:hover{
     background:#0a0a0a;
     transition:all 0.2s;
 }
-
 .task:hover{border-color:#555;}
-
 .task-info strong{
     font-size:1rem;
 }
-
 .sub-text{
     font-size:11px;
     color:var(--sub);
 }
-
 .genre-tag-small{
     font-size:10px;
     font-weight:bold;
     margin-right:6px;
 }
+.completed {
+    opacity: 0.6;
+}
 </style>
 </head>
 <body>
-
 <div id="nav">
     <div class="nav-btn active" onclick="sw('t')">TASK</div>
     <div class="nav-btn" onclick="sw('s')">CORE</div>
 </div>
-
 <div id="main">
     <div id="sc-t">
         <h2>TERMINAL_</h2>
-
         <div class="box">
             <div class="input-group">
                 <input id="title" placeholder="WHAT NEEDS TO BE DONE?" style="flex:1;">
                 <select id="mode">
                     <option value="once">ONCE</option>
                     <option value="daily">DAILY</option>
+                    <option value="weekdays">WEEKDAYS</option>
+                    <option value="monthly">MONTHLY</option>
                 </select>
                 <select id="genre"></select>
                 <input type="date" id="date">
@@ -155,14 +142,11 @@ button:hover{
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
-
-        <h3 class="sub-text" style="color:#0ff;">Active Tasks</h3>
+        <h3 class="sub-text" style="color:var(--accent);">Active Tasks (Sorted by Due Date)</h3>
         <div id="active"></div>
-
         <h3 class="sub-text" style="margin-top:30px;">Completed Tasks</h3>
         <div id="done"></div>
     </div>
-
     <div id="sc-s" style="display:none;">
         <h2>CORE_UPDATE</h2>
         <div class="box">
@@ -201,7 +185,6 @@ function add(){
     const mode=document.getElementById("mode").value;
     const genre=document.getElementById("genre").value;
     const date=document.getElementById("date").value;
-
     DB.tasks.push({id:Date.now(),title,mode,genre,date});
     tInput.value="";
     save();
@@ -212,7 +195,7 @@ function doneTask(id){
     const t=DB.tasks.find(x=>x.id===id);
     if(!t)return;
     DB.tasks=DB.tasks.filter(x=>x.id!==id);
-    DB.done.unshift(t);
+    DB.done.unshift({...t, completedAt: Date.now()});
     save();
     render();
 }
@@ -232,7 +215,22 @@ function delDone(id){
 function restoreDone(id){
     const t=DB.done.find(x=>x.id===id);
     if(!t)return;
-    DB.tasks.push({...t,id:Date.now()});
+    DB.done=DB.done.filter(x=>x.id!==id);
+    DB.tasks.push({...t, id:Date.now()});
+    save();
+    render();
+}
+
+function copyDone(id){
+    const t=DB.done.find(x=>x.id===id);
+    if(!t)return;
+    DB.tasks.push({
+        id: Date.now(),
+        title: t.title,
+        mode: t.mode,
+        genre: t.genre,
+        date: document.getElementById("date").value // 今日の日付でコピー
+    });
     save();
     render();
 }
@@ -249,43 +247,52 @@ function addGenre(){
 
 function delGenre(g){
     if(!confirm(`Delete genre: ${g}?`))return;
-    DB.genres=DB.genres.filter(x=>x!==g);
+    DB.genres=DB.genres.filter(x!==g);
     save();
     render();
 }
 
 function render(){
+    // ジャンル選択の更新
     const gSelect=document.getElementById("genre");
+    const currentGenre = gSelect.value;
     gSelect.innerHTML="";
     DB.genres.forEach(g=>{
         const o=document.createElement("option"); o.value=g; o.textContent=g;
         gSelect.appendChild(o);
     });
+    if(DB.genres.includes(currentGenre)) gSelect.value = currentGenre;
 
     const ge=document.getElementById("genre-edit");
     ge.innerHTML="";
     DB.genres.forEach(g=>{
         const div=document.createElement("div");
-        div.className="genre-pill";
         div.style.color=getGenreColor(g);
         div.style.border=`1px solid ${getGenreColor(g)}`;
         div.style.padding="2px 6px";
         div.style.borderRadius="4px";
         div.style.fontSize="11px";
-        div.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f00;">×</span>`;
+        div.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f00;margin-left:4px;">×</span>`;
         ge.appendChild(div);
     });
 
+    // 期限順にソートして描画
     const a=document.getElementById("active");
     a.innerHTML="";
-    DB.tasks.forEach(t=>{
+    const sortedTasks = [...DB.tasks].sort((a, b) => {
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    sortedTasks.forEach(t=>{
         const div=document.createElement("div");
         div.className="task";
         div.style.borderLeft=`3px solid ${getGenreColor(t.genre)}`;
         div.innerHTML=`
             <div class="task-info">
                 <strong><span class="genre-tag-small" style="color:${getGenreColor(t.genre)}">[${t.genre}]</span>${t.title}</strong>
-                <span class="sub-text">${t.mode} / DUE: ${t.date||"NO_LIMIT"}</span>
+                <span class="sub-text">${t.mode.toUpperCase()} / DUE: ${t.date||"NO_LIMIT"}</span>
             </div>
             <div>
                 <button onclick="doneTask(${t.id})">Complete</button>
@@ -295,17 +302,20 @@ function render(){
         a.appendChild(div);
     });
 
+    // 完了済みタスクの描画（コピー機能追加）
     const d=document.getElementById("done");
     d.innerHTML="";
     DB.done.forEach(t=>{
         const div=document.createElement("div");
-        div.className="task";
+        div.className="task completed";
         div.style.borderLeft=`3px solid ${getGenreColor(t.genre)}`;
         div.innerHTML=`
             <div class="task-info">
                 <strong><span class="genre-tag-small" style="color:${getGenreColor(t.genre)}">[${t.genre}]</span>${t.title}</strong>
+                <span class="sub-text">COMPLETED</span>
             </div>
             <div>
+                <button onclick="copyDone(${t.id})" title="Copy to Active">Copy</button>
                 <button onclick="restoreDone(${t.id})">Restore</button>
                 <button onclick="delDone(${t.id})">Del</button>
             </div>
