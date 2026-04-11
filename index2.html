@@ -10,59 +10,31 @@
     --sub: #666;
     --accent: #0ff;
     --danger: #ff3131;
+    --warning: #f80;
     --neon-purple: #b026ff;
 }
 body {
-    margin:0;
-    background: var(--bg);
-    color: var(--text);
+    margin:0; background: var(--bg); color: var(--text);
     font-family:'Inter','Segoe UI','Meiryo',sans-serif;
-    display:flex;
-    height:100vh;
-    overflow: hidden;
+    display:flex; height:100vh; overflow: hidden;
 }
 #nav{
-    width:70px;
-    background:#111;
-    border-right:1px solid #222;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding-top:30px;
+    width:70px; background:#111; border-right:1px solid #222;
+    display:flex; flex-direction:column; align-items:center; padding-top:30px;
 }
 .nav-btn{
-    width:44px;height:44px;
-    border:1px solid #333;
-    margin-bottom:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
-    color:var(--sub);
-    font-size:9px;
-    font-weight:900;
-    letter-spacing:1px;
+    width:44px; height:44px; border:1px solid #333; margin-bottom:20px;
+    display:flex; justify-content:center; align-items:center;
+    cursor:pointer; color:var(--sub); font-size:9px; font-weight:900; letter-spacing:1px;
 }
-.nav-btn.active{border-color:var(--accent);color:var(--accent);box-shadow: 0 0 10px rgba(0,255,255,0.2);}
+.nav-btn.active{border-color:var(--accent); color:var(--accent); box-shadow: 0 0 10px rgba(0,255,255,0.2);}
 
-#main{
-    flex:1;
-    padding:30px 40px;
-    overflow-y:auto;
-}
-h2{
-    font-weight:200; font-size:2rem; margin:0 0 30px 0; color:#fff; letter-spacing: 2px;
-}
-.box{
-    background:#111; border:1px solid #222; padding:20px; margin-bottom:20px; border-radius:4px;
-}
+#main{ flex:1; padding:30px 40px; overflow-y:auto; }
+h2{ font-weight:200; font-size:2rem; margin:0 0 30px 0; color:#fff; letter-spacing: 2px; }
+.box{ background:#111; border:1px solid #222; padding:20px; margin-bottom:20px; border-radius:4px; }
 .input-group{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-input, select, textarea{
-    background:#000; border:1px solid #222; color:#fff; padding:8px 12px; font-size:14px; border-radius:2px;
-}
-button{
-    background:transparent; border:1px solid #555; color:#aaa; padding:6px 10px; font-size:11px; cursor:pointer;
-}
+input, select, textarea{ background:#000; border:1px solid #222; color:#fff; padding:8px 12px; font-size:14px; border-radius:2px; }
+button{ background:transparent; border:1px solid #555; color:#aaa; padding:6px 10px; font-size:11px; cursor:pointer; }
 button:hover{ border-color:var(--accent); color:var(--accent); }
 
 .task{
@@ -70,16 +42,16 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
     border-left:3px solid #444; border-radius:4px; background:#0a0a0a;
 }
 .sub-text{ font-size:11px; color:var(--sub); }
-.timer-display{
-    font-size: 4rem; font-weight: 100; font-family: 'Courier New', monospace; color: var(--accent); text-align: center; margin: 15px 0;
-}
+.timer-display{ font-size: 4rem; font-weight: 100; font-family: 'Courier New', monospace; text-align: center; margin: 15px 0; }
 .lap-list{ max-height: 120px; overflow-y: auto; border-top: 1px solid #222; margin-top: 10px; }
 .lap-item{ padding: 5px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; display: flex; justify-content: space-between; }
 
-@keyframes screen-alert { 0%, 100% { background: #0a0a0a; } 50% { background: #400; } }
-.critical-alarm { animation: screen-alert 0.5s infinite !important; }
-.completed { opacity: 0.5; }
+@keyframes screen-alert { 0%, 100% { background: #0a0a0a; } 50% { background: #410; } }
+.critical-alarm { animation: screen-alert 0.4s infinite !important; }
 .notify-opt { font-size: 11px; color: #aaa; display: flex; gap: 10px; margin-top: 10px; }
+
+/* Width Optimization */
+.time-unit { flex: 0 0 40%; max-width: 450px; }
 </style>
 </head>
 <body id="body">
@@ -97,10 +69,8 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
             <div class="input-group">
                 <input id="title" placeholder="WHAT NEEDS TO BE DONE?" style="flex:1;">
                 <select id="mode">
-                    <option value="once">ONCE</option>
-                    <option value="daily">DAILY</option>
-                    <option value="weekdays">WEEKDAYS</option>
-                    <option value="monthly">MONTHLY</option>
+                    <option value="once">ONCE</option><option value="daily">DAILY</option>
+                    <option value="weekdays">WEEKDAYS</option><option value="monthly">MONTHLY</option>
                 </select>
                 <select id="genre"></select>
                 <input type="date" id="date">
@@ -108,7 +78,7 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
-        <h3 class="sub-text" style="color:#fff; font-size:12px; letter-spacing:1px; margin-bottom:15px;">ACTIVE_OPERATIONS</h3>
+        <h3 class="sub-text" style="color:#fff;">ACTIVE_OPERATIONS</h3>
         <div id="active"></div>
         <h3 class="sub-text" style="margin-top:40px; border-top:1px solid #222; padding-top:20px;">ARCHIVED_LOGS</h3>
         <div id="done"></div>
@@ -117,9 +87,24 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
     <div id="sc-time" style="display:none;">
         <h2>CHRONO_UNIT</h2>
         <div style="display: flex; gap: 20px;">
-            <div class="box" style="flex: 1;">
-                <h3 class="sub-text" style="color:#fff;">STOPWATCH</h3>
-                <div id="sw-display" class="timer-display">00:00:00.0</div>
+            <div class="box time-unit" style="border-top: 3px solid var(--warning);">
+                <h3 class="sub-text" style="color:var(--warning);">ALARM / NOTIFIER</h3>
+                <div id="al-display" class="timer-display" style="color:var(--warning);">00:00:00</div>
+                <div class="input-group" style="justify-content: center;">
+                    <input type="time" id="al-time" step="1">
+                    <button onclick="alSet()" style="border-color: var(--warning); color: var(--warning);">ENGAGE</button>
+                    <button onclick="alStop()">KILL</button>
+                </div>
+                <div class="notify-opt" style="justify-content: center;">
+                    <label><input type="checkbox" id="pre-5" checked> 5m</label>
+                    <label><input type="checkbox" id="pre-1" checked> 1m</label>
+                    <label><input type="checkbox" id="pre-0" checked> Now</label>
+                </div>
+                <p id="al-status" class="sub-text" style="text-align: center; margin-top: 15px;">AWAITING COMMAND...</p>
+            </div>
+            <div class="box time-unit" style="border-top: 3px solid var(--accent);">
+                <h3 class="sub-text" style="color:var(--accent);">STOPWATCH</h3>
+                <div id="sw-display" class="timer-display" style="color:var(--accent);">00:00:00.0</div>
                 <div style="display: flex; gap: 5px; justify-content: center;">
                     <button onclick="swStart()">START</button>
                     <button onclick="swStop()">STOP</button>
@@ -128,55 +113,42 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
                 </div>
                 <div id="sw-laps" class="lap-list"></div>
             </div>
-            <div class="box" style="flex: 1.2;">
-                <h3 class="sub-text" style="color:#fff;">ALARM / NOTIFIER</h3>
-                <div id="al-display" class="timer-display">00:00:00</div>
-                <div class="input-group" style="justify-content: center;">
-                    <input type="time" id="al-time" step="1">
-                    <button onclick="alSet()" style="border-color: var(--accent); color: var(--accent);">ENGAGE</button>
-                    <button onclick="alStop()">KILL_ALARM</button>
-                </div>
-                <div class="notify-opt" style="justify-content: center;">
-                    <label><input type="checkbox" id="pre-5" checked> 5m Early</label>
-                    <label><input type="checkbox" id="pre-1" checked> 1m Early</label>
-                    <label><input type="checkbox" id="pre-0" checked> At Time</label>
-                </div>
-                <p id="al-status" class="sub-text" style="text-align: center; margin-top: 15px;">AWAITING COMMAND...</p>
-            </div>
         </div>
     </div>
 
     <div id="sc-s" style="display:none;">
         <h2>CORE_CONFIG</h2>
         <div class="box">
-            <textarea id="code" style="width:100%; height:400px; font-family:'Consolas',monospace; border-color:#333;"></textarea>
+            <textarea id="code" style="width:100%; height:400px; font-family:'Consolas',monospace;"></textarea>
             <button onclick="update()" style="width:100%; margin-top:10px;">Apply Core Update</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- CORE DB ---
 let DB = JSON.parse(localStorage.getItem("NEON_DB")) || {tasks:[], done:[], genres:["Work","Personal","Hobby"]};
 function save(){localStorage.setItem("NEON_DB",JSON.stringify(DB));}
 
-// --- NAVIGATION ---
 function sw(s){
     ["sc-t","sc-time","sc-s"].forEach(id=>document.getElementById(id).style.display="none");
     document.getElementById("sc-"+s).style.display="block";
     document.querySelectorAll(".nav-btn").forEach((btn,idx)=>btn.classList.toggle("active", (s==='t'&&idx===0)||(s==='time'&&idx===1)||(s==='s'&&idx===2)));
 }
 
-// --- AUDIO ENGINE ---
+// --- AUDIO (Enhanced) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function beep(freq, duration) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    osc.start(); osc.stop(audioCtx.currentTime + duration);
+function multiBeep(freq, count, speed) {
+    for(let i=0; i<count; i++) {
+        setTimeout(() => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }, i * speed);
+    }
 }
 
 // --- STOPWATCH ---
@@ -194,15 +166,15 @@ function swLap(){
     document.getElementById("sw-laps").prepend(lap);
 }
 
-// --- ALARM LOGIC ---
+// --- ALARM ---
 let alTarget=null, alInterval=null, alFlags={m5:false, m1:false};
 function alSet(){
     const val=document.getElementById("al-time").value; if(!val) return;
     const [h, m, s] = val.split(":").map(Number);
     const now = new Date(); alTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, s || 0);
-    if(alTarget < now) alTarget.setDate(alTarget.getDate()+1);
+    if(alTarget < now) alTarget.setDate(alTarget.setDate()+1);
     alFlags = {m5: false, m1: false};
-    document.getElementById("al-status").innerText = "TRACKING TARGET: " + val;
+    document.getElementById("al-status").innerText = "TRACKING: " + val;
     if(alInterval) clearInterval(alInterval);
     alInterval = setInterval(alUpdate, 1000);
 }
@@ -211,20 +183,17 @@ function alUpdate(){
     if(diff <= 0){
         if(document.getElementById("pre-0").checked) {
             document.getElementById("body").classList.add("critical-alarm");
-            beep(880, 0.5);
-        }
-        clearInterval(alInterval);
-        document.getElementById("al-status").innerText = "TARGET REACHED";
+            multiBeep(880, 4, 150); // 強力な4連音
+        } else { clearInterval(alInterval); }
+        document.getElementById("al-status").innerText = "SIGNAL DETECTED";
     } else {
         const h=Math.floor(diff/(1000*60*60)), m=Math.floor((diff/(1000*60))%60), s=Math.floor((diff/1000)%60);
         document.getElementById("al-display").innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        
-        // Notification Logic
         if(diff <= 300000 && diff > 299000 && !alFlags.m5 && document.getElementById("pre-5").checked) { 
-            alFlags.m5 = true; beep(440, 0.2); setTimeout(()=>beep(440,0.2), 400); 
+            alFlags.m5 = true; multiBeep(440, 2, 200); 
         }
         if(diff <= 60000 && diff > 59000 && !alFlags.m1 && document.getElementById("pre-1").checked) { 
-            alFlags.m1 = true; beep(660, 0.2); setTimeout(()=>beep(660,0.2), 400);
+            alFlags.m1 = true; multiBeep(660, 2, 200);
         }
     }
 }
@@ -233,22 +202,17 @@ function alStop(){
     document.getElementById("al-display").innerText = "00:00:00"; document.getElementById("al-status").innerText = "STANDBY";
 }
 
-// --- TASK RENDER (MINIFIED) ---
-const genreColors=["#0ff", "#b026ff", "#f0f", "#ff0", "#0f0", "#f80", "#08f", "#7fff00"];
+// --- TASK (MINIFIED) ---
+const colors=["#0ff", "#b026ff", "#f0f", "#ff0", "#0f0", "#f80", "#08f", "#7fff00"];
 function render(){
     const gS=document.getElementById("genre"); gS.innerHTML="";
     DB.genres.forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; gS.appendChild(o); });
-    const ge=document.getElementById("genre-edit"); ge.innerHTML="";
-    DB.genres.forEach(g=>{
-        const div=document.createElement("div"); div.style.cssText=`color:${genreColors[DB.genres.indexOf(g)%8]}; border:1px solid currentColor; padding:2px 8px; border-radius:4px; font-size:11px;`;
-        div.innerHTML=`${g} <span onclick="DB.genres=DB.genres.filter(x=>x!=='${g}');save();render();" style="cursor:pointer;color:#f44;margin-left:6px;">×</span>`;
-        ge.appendChild(div);
-    });
     const act=document.getElementById("active"); act.innerHTML="";
     DB.tasks.sort((a,b)=>(a.date||"9999")>(b.date||"9999")?1:-1).forEach(t=>{
-        const div=document.createElement("div"); div.className="task"; div.style.borderLeft=`3px solid ${genreColors[DB.genres.indexOf(t.genre)%8]}`;
-        const isUrgent = t.mode==='once'&&t.date&&t.date<=(new Date().toISOString().split('T')[0]);
-        div.innerHTML=`<div class="task-info"><strong><span style="color:${genreColors[DB.genres.indexOf(t.genre)%8]}">[${t.genre}]</span> ${t.title}</strong><br><span class="sub-text ${isUrgent?'alert-due':''}">${t.mode.toUpperCase()} / DUE: ${t.date||"N/A"}</span></div>
+        const c=colors[DB.genres.indexOf(t.genre)%8];
+        const div=document.createElement("div"); div.className="task"; div.style.borderLeft=`3px solid ${c}`;
+        const isU = t.mode==='once'&&t.date&&t.date<=(new Date().toISOString().split('T')[0]);
+        div.innerHTML=`<div class="task-info"><strong><span style="color:${c}">[${t.genre}]</span> ${t.title}</strong><br><span class="sub-text ${isU?'alert-due':''}">${t.mode.toUpperCase()} / DUE: ${t.date||"N/A"}</span></div>
         <div><button onclick="doneTask(${t.id})">DONE</button></div>`;
         act.appendChild(div);
     });
