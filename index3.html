@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>NEON CORE: PRIME - ULTIMATE INTEGRATION</title>
+<title>NEON CORE: PRIME - ULTIMATE</title>
 <style>
 :root {
     --bg: #0a0a0a; --text: #e0e0e0; --sub: #666; --accent: #0ff;
@@ -16,7 +16,7 @@ body {
 }
 #nav{
     width:70px; background:#111; border-right:1px solid #222;
-    display:flex; flex-direction:column; align-items:center; padding-top:30px; z-index: 100;
+    display:flex; flex-direction:column; align-items:center; padding-top:30px; z-index: 1000;
 }
 .nav-btn{
     width:44px; height:44px; border:1px solid #333; margin-bottom:20px;
@@ -25,39 +25,34 @@ body {
 }
 .nav-btn.active{border-color:var(--accent); color:var(--accent); box-shadow: 0 0 10px rgba(0,255,255,0.2);}
 
-#main{ flex:1; position: relative; overflow: hidden; }
-.screen{ position: absolute; width:100%; height:100%; padding:30px 40px; box-sizing: border-box; overflow-y:auto; display:none; }
-.screen.active{ display:block; }
-
+#main{ flex:1; padding:30px 40px; overflow-y:auto; position: relative; }
 h2{ font-weight:200; font-size:2rem; margin:0 0 30px 0; color:#fff; letter-spacing: 2px; }
-.box{ background:#111; border:1px solid #222; padding:20px; margin-bottom:20px; border-radius:4px; }
+.box{ background:#111; border:1px solid #222; padding:20px; margin-bottom:20px; border-radius:4px; position: relative; z-index: 10;}
 .input-group{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 input, select, textarea{ background:#000; border:1px solid #222; color:#fff; padding:8px 12px; font-size:14px; border-radius:2px; }
 button{ background:transparent; border:1px solid #555; color:#aaa; padding:6px 10px; font-size:11px; cursor:pointer; }
 button:hover{ border-color:var(--accent); color:var(--accent); }
 
-/* MEMO & STICKER STYLES */
-#memo-layer { position: absolute; inset: 0; pointer-events: none; }
-.screen.active#sc-memo #memo-layer { pointer-events: auto; }
+/* MEMO & STICKER SYSTEM */
+#memo-container { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+#sc-memo.active #memo-container { display: block; pointer-events: auto; }
 
 .sticky {
-    position: absolute; width: 220px; min-height: 100px; background: #151515;
+    position: absolute; width: 200px; min-height: 80px; background: #161616;
     border-left: 4px solid var(--accent); padding: 12px; cursor: move;
-    box-shadow: 8px 8px 20px rgba(0,0,0,0.6); z-index: 10;
+    box-shadow: 8px 8px 25px rgba(0,0,0,0.5); pointer-events: auto;
 }
-.sticky textarea { background: transparent; border: none; width: 100%; resize: none; outline: none; padding: 0; font-size: 14px; line-height: 1.5; color: #fff; }
-.mark-area { font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 8px; display: inline-block; min-width: 20px; }
-.sticky-footer { display: flex; justify-content: flex-end; margin-top: 5px; }
+.sticky textarea { background: transparent !important; border: none !important; width: 100% !important; resize: none; outline: none; padding: 0; font-size: 14px; line-height: 1.5; color: #fff; overflow: hidden; }
+.mark-area { font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 5px; display: inline-block; }
 
 .sticker {
     position: absolute; width: 60px; height: 60px; border-radius: 50%;
     display: flex; justify-content: center; align-items: center; cursor: move;
-    font-size: 32px; background: rgba(0,0,0,0.2); z-index: 5;
+    font-size: 32px; background: rgba(0,0,0,0.3); pointer-events: auto;
 }
-.sticker .del-x { position: absolute; top: -5px; right: -5px; font-size: 12px; color: #444; opacity: 0; cursor: pointer; }
-.sticker:hover .del-x { opacity: 1; }
+.del-icon { position: absolute; top: -10px; right: -10px; color: #444; font-size: 12px; cursor: pointer; }
 
-/* TASK & TIME STYLES */
+/* EXISTING STYLES */
 .task{ display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin:6px 0; border:1px solid #222; border-left:3px solid #444; border-radius:4px; background:#0a0a0a; }
 .sub-text{ font-size:11px; color:var(--sub); }
 .timer-display{ font-size: 4rem; font-weight: 100; font-family: 'Courier New', monospace; text-align: center; margin: 15px 0; }
@@ -77,7 +72,7 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
 </div>
 
 <div id="main">
-    <div id="sc-t" class="screen active">
+    <div id="sc-t">
         <h2>MISSION_CONTROL</h2>
         <div class="box">
             <div class="input-group">
@@ -90,9 +85,10 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
         <div id="active"></div>
+        <div id="done"></div>
     </div>
 
-    <div id="sc-time" class="screen">
+    <div id="sc-time" style="display:none;">
         <h2>CHRONO_UNIT</h2>
         <div style="display: flex; gap: 20px;">
             <div class="box" style="flex:1; border-top: 3px solid var(--warning);">
@@ -102,6 +98,7 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
                     <button onclick="alSet()">ENGAGE</button>
                     <button onclick="alStop()">KILL</button>
                 </div>
+                <p id="al-status" class="sub-text" style="text-align: center; margin-top: 15px;">STANDBY</p>
             </div>
             <div class="box" style="flex:1; border-top: 3px solid var(--accent);">
                 <div id="sw-display" class="timer-display" style="color:var(--accent);">00:00:00.0</div>
@@ -112,26 +109,26 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
         </div>
     </div>
 
-    <div id="sc-memo" class="screen">
+    <div id="sc-memo" style="display:none;">
         <h2>MEMO_BOARD</h2>
-        <div class="box" style="position: relative; z-index: 100;">
+        <div class="box">
             <div class="input-group">
                 <div style="display:flex; gap:8px;">
-                    <div style="width:20px;height:20px;background:var(--accent);border-radius:50%;cursor:pointer;" onclick="setStickyColor('var(--accent)')"></div>
-                    <div style="width:20px;height:20px;background:var(--neon-pink);border-radius:50%;cursor:pointer;" onclick="setStickyColor('var(--neon-pink)')"></div>
-                    <div style="width:20px;height:20px;background:var(--neon-green);border-radius:50%;cursor:pointer;" onclick="setStickyColor('var(--neon-green)')"></div>
+                    <div style="width:20px;height:20px;background:var(--accent);border-radius:50%;cursor:pointer;" onclick="setMCol('var(--accent)')"></div>
+                    <div style="width:20px;height:20px;background:var(--neon-pink);border-radius:50%;cursor:pointer;" onclick="setMCol('var(--neon-pink)')"></div>
+                    <div style="width:20px;height:20px;background:var(--neon-green);border-radius:50%;cursor:pointer;" onclick="setMCol('var(--neon-green)')"></div>
                 </div>
-                <button onclick="createSticky()">+ ADD STICKY</button>
-                <span style="color:#333; margin:0 10px;">|</span>
-                <button onclick="createSticker('♥', 'var(--neon-pink)')" style="color:var(--neon-pink)">♥ SEAL</button>
-                <button onclick="createSticker('★', 'var(--neon-yellow)')" style="color:var(--neon-yellow)">★ SEAL</button>
-                <button onclick="createSticker('💡', 'var(--accent)')" style="color:var(--accent)">💡 SEAL</button>
+                <button onclick="createM()">+ ADD STICKY</button>
+                <span style="color:#222; margin:0 10px;">|</span>
+                <button onclick="createS('♥','var(--neon-pink)')" style="color:var(--neon-pink)">♥ SEAL</button>
+                <button onclick="createS('★','var(--neon-yellow)')" style="color:var(--neon-yellow)">★ SEAL</button>
+                <button onclick="createS('💡','var(--accent)')" style="color:var(--accent)">💡 SEAL</button>
             </div>
         </div>
-        <div id="memo-layer"></div>
+        <div id="memo-container"></div>
     </div>
 
-    <div id="sc-s" class="screen">
+    <div id="sc-s" style="display:none;">
         <h2>CORE_CONFIG</h2>
         <div class="box">
             <textarea id="code" style="width:100%; height:400px; font-family:monospace;"></textarea>
@@ -144,78 +141,78 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
 // --- CORE ENGINE ---
 const workerCode = `let t=null;self.onmessage=e=>{if(e.data==='start'){if(!t)t=setInterval(()=>self.postMessage('t'),100)}else{clearInterval(t);t=null}}`;
 const worker = new Worker(URL.createObjectURL(new Blob([workerCode],{type:'application/javascript'})));
-let DB = JSON.parse(localStorage.getItem("NEON_DB_V2")) || {tasks:[], genres:["Work","Personal","Hobby"], memos:[]};
-function save(){localStorage.setItem("NEON_DB_V2",JSON.stringify(DB));}
+let DB = JSON.parse(localStorage.getItem("NEON_DB_PRIME")) || {tasks:[], done:[], genres:["Work","Personal","Hobby"], memos:[]};
+function save(){localStorage.setItem("NEON_DB_PRIME",JSON.stringify(DB));}
 
-function sw(id){
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('sc-'+id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active', ['t','time','memo','s'][i]===id));
+function sw(s){
+    ["sc-t","sc-time","sc-memo","sc-s"].forEach(id=>document.getElementById(id).style.display="none");
+    ["sc-t","sc-time","sc-memo","sc-s"].forEach(id=>document.getElementById(id).classList.remove("active"));
+    document.getElementById("sc-"+s).style.display="block";
+    document.getElementById("sc-"+s).classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach((btn,idx)=>btn.classList.toggle("active", (s==='t'&&idx===0)||(s==='time'&&idx===1)||(s==='memo'&&idx===2)||(s==='s'&&idx===3)));
 }
 
-// --- CLOCK & ALARM ---
+// --- ALARM & SW (Original Logic) ---
 let swTime=0, swRunning=false, alTarget=null, alarmLoop=null;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function beep(f,d){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+d);o.start();o.stop(audioCtx.currentTime+d)}
-worker.onmessage=()=>{if(swRunning){swTime+=100;swUpdate()}if(alTarget)alUpdate()};
+worker.onmessage=()=>{if(swRunning){swTime+=100;swUp()}if(alTarget)alUp()};
 function swStart(){swRunning=true;worker.postMessage('start')}
 function swStop(){swRunning=false;if(!alTarget)worker.postMessage('stop')}
-function swReset(){swStop();swTime=0;swUpdate()}
-function swUpdate(){const ms=Math.floor((swTime%1000)/100),s=Math.floor((swTime/1000)%60),m=Math.floor((swTime/6e4)%60),h=Math.floor(swTime/36e5);document.getElementById("sw-display").innerText=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms}`}
-function alSet(){const v=document.getElementById("al-time").value;if(!v)return;const [h,m,s]=v.split(":").map(Number);alTarget=new Date();alTarget.setHours(h,m,s||0,0);if(alTarget<new Date())alTarget.setDate(alTarget.getDate()+1);worker.postMessage('start')}
-function alUpdate(){const d=alTarget-new Date();if(d<=0){document.getElementById("body").classList.add("critical-alarm");if(!alarmLoop)alarmLoop=setInterval(()=>beep(880,0.1),1000);alTarget=null;if(!swRunning)worker.postMessage('stop')}else{const h=Math.floor(d/36e5),m=Math.floor((d%36e5)/6e4),s=Math.floor((d%6e4)/1e3);document.getElementById("al-display").innerText=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`}}
-function alStop(){alTarget=null;clearInterval(alarmLoop);alarmLoop=null;document.getElementById("body").classList.remove("critical-alarm");document.getElementById("al-display").innerText="00:00:00";if(!swRunning)worker.postMessage('stop')}
+function swReset(){swStop();swTime=0;swUp()}
+function swUp(){const ms=Math.floor((swTime%1000)/100),s=Math.floor((swTime/1000)%60),m=Math.floor((swTime/6e4)%60),h=Math.floor(swTime/36e5);document.getElementById("sw-display").innerText=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms}`}
+function alSet(){const v=document.getElementById("al-time").value;if(!v)return;const [h,m,s]=v.split(":").map(Number);alTarget=new Date();alTarget.setHours(h,m,s||0,0);if(alTarget<new Date())alTarget.setDate(alTarget.getDate()+1);document.getElementById("al-status").innerText="TRACKING";worker.postMessage('start')}
+function alUp(){const d=alTarget-new Date();if(d<=0){document.getElementById("body").classList.add("critical-alarm");if(!alarmLoop)alarmLoop=setInterval(()=>beep(880,0.1),1000);alTarget=null;if(!swRunning)worker.postMessage('stop')}else{const h=Math.floor(d/36e5),m=Math.floor((d%36e5)/6e4),s=Math.floor((d%6e4)/1e3);document.getElementById("al-display").innerText=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`}}
+function alStop(){alTarget=null;clearInterval(alarmLoop);alarmLoop=null;document.getElementById("body").classList.remove("critical-alarm");document.getElementById("al-display").innerText="00:00:00";document.getElementById("al-status").innerText="STANDBY";if(!swRunning)worker.postMessage('stop')}
 
-// --- MEMO LOGIC ---
-let curStickyCol = 'var(--accent)';
-function setStickyColor(c){ curStickyCol = c; }
-
-function saveMemos(){
-    const m = Array.from(document.querySelectorAll('.sticky')).map(el=>({type:'m',id:el.id,x:el.style.left,y:el.style.top,c:el.style.borderLeftColor,txt:el.querySelector('textarea').value,mk:el.querySelector('.mark-area').innerText}));
-    const s = Array.from(document.querySelectorAll('.sticker')).map(el=>({type:'s',id:el.id,x:el.style.left,y:el.style.top,icon:el.querySelector('.s-ico').innerText,c:el.querySelector('.s-ico').style.color}));
-    DB.memos = [...m,...s]; save();
+// --- MEMO SYSTEM ---
+let curMCol = 'var(--accent)';
+function setMCol(c){ curMCol = c; }
+function saveM(){
+    const ms = Array.from(document.querySelectorAll('.sticky')).map(el=>({type:'m',id:el.id,x:el.style.left,y:el.style.top,c:el.style.borderLeftColor,txt:el.querySelector('textarea').value,mk:el.querySelector('.mark-area').innerText}));
+    const ss = Array.from(document.querySelectorAll('.sticker')).map(el=>({type:'s',id:el.id,x:el.style.left,y:el.style.top,icon:el.querySelector('.s-ico').innerText,c:el.querySelector('.s-ico').style.color}));
+    DB.memos = [...ms,...ss]; save();
 }
-
 function makeDrag(el){
-    el.onmousedown = e => {
-        if(e.target.tagName==='TEXTAREA'||e.target.classList.contains('mark-area')||e.target.classList.contains('del-x')) return;
+    el.onmousedown=e=>{
+        if(e.target.tagName==='TEXTAREA'||e.target.classList.contains('mark-area')||e.target.classList.contains('del-icon')) return;
         let sx=e.clientX-el.getBoundingClientRect().left, sy=e.clientY-el.getBoundingClientRect().top;
-        document.onmousemove = e => { el.style.left=e.pageX-sx+'px'; el.style.top=e.pageY-sy+'px'; };
-        document.onmouseup = () => { document.onmousemove=null; saveMemos(); };
+        document.onmousemove=e=>{el.style.left=e.pageX-sx+'px';el.style.top=e.pageY-sy+'px'};
+        document.onmouseup=()=>{document.onmousemove=null;saveM();};
     };
 }
-
-function createSticky(data=null){
+function createM(data=null){
     const el=document.createElement('div'); el.className='sticky'; el.id=data?data.id:'m'+Date.now();
-    el.style.left=data?data.x:'100px'; el.style.top=data?data.y:'180px'; el.style.borderLeftColor=data?data.c:curStickyCol;
+    el.style.left=data?data.x:'120px'; el.style.top=data?data.y:'200px'; el.style.borderLeftColor=data?data.c:curMCol;
     const mk=["","!","?","★"]; let mi=data?mk.indexOf(data.mk):0;
     el.innerHTML=`<div class="mark-area" style="color:${el.style.borderLeftColor}">${data?data.mk:""}</div>
-                  <textarea placeholder="Type...">${data?data.txt:""}</textarea>
-                  <div class="sticky-footer"><button style="font-size:8px;padding:2px 4px;border:none;" onclick="this.parentElement.parentElement.remove();saveMemos();">REMOVE</button></div>`;
-    el.querySelector('.mark-area').onclick=e=>{mi=(mi+1)%mk.length; e.target.innerText=mk[mi]; saveMemos();};
-    const ta=el.querySelector('textarea'); ta.oninput=()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';saveMemos();};
-    makeDrag(el); document.getElementById('memo-layer').appendChild(el); ta.style.height=ta.scrollHeight+'px'; if(!data)saveMemos();
+                  <textarea placeholder="MEMO...">${data?data.txt:""}</textarea>
+                  <div style="text-align:right;cursor:pointer;font-size:9px;color:#333;" onclick="this.parentElement.remove();saveM();">DEL</div>`;
+    el.querySelector('.mark-area').onclick=e=>{mi=(mi+1)%mk.length;e.target.innerText=mk[mi];saveM();};
+    const ta=el.querySelector('textarea'); ta.oninput=()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';saveM();};
+    makeDrag(el); document.getElementById('memo-container').appendChild(el); ta.style.height=ta.scrollHeight+'px'; if(!data)saveM();
 }
-
-function createSticker(icon, color, data=null){
+function createS(icon,color,data=null){
     const el=document.createElement('div'); el.className='sticker'; el.id=data?data.id:'s'+Date.now();
     el.style.left=data?data.x:'200px'; el.style.top=data?data.y:'250px';
-    const c = data?data.c:color; el.style.border=`2px solid ${c}`; el.style.boxShadow=`0 0 12px ${c}`;
-    el.innerHTML=`<div class="s-ico" style="color:${c}">${data?data.icon:icon}</div><div class="del-x" onclick="this.parentElement.remove();saveMemos();">×</div>`;
-    makeDrag(el); document.getElementById('memo-layer').appendChild(el); if(!data)saveMemos();
+    const c=data?data.c:color; el.style.border=`2px solid ${c}`; el.style.boxShadow=`0 0 12px ${c}`;
+    el.innerHTML=`<div class="s-ico" style="color:${c}">${data?data.icon:icon}</div><div class="del-icon" onclick="this.parentElement.remove();saveM();">×</div>`;
+    makeDrag(el); document.getElementById('memo-container').appendChild(el); if(!data)saveM();
 }
 
-// --- TASKS ---
+// --- TASK SYSTEM ---
 function addTask(){const t=document.getElementById("title").value.trim();if(!t)return;DB.tasks.push({id:Date.now(),title:t,mode:document.getElementById("mode").value,genre:document.getElementById("genre").value,date:document.getElementById("date").value});document.getElementById("title").value="";save();render()}
+function delGenre(g){DB.genres=DB.genres.filter(x=>x!==g);save();render()}
 function render(){
     const gs=document.getElementById("genre");gs.innerHTML="";DB.genres.forEach(g=>{const o=document.createElement("option");o.value=g;o.textContent=g;gs.appendChild(o)});
-    const act=document.getElementById("active");act.innerHTML="";DB.tasks.forEach(t=>{const d=document.createElement("div");d.className="task";d.innerHTML=`<div><strong>${t.title}</strong><br><span class="sub-text">${t.mode} / ${t.date}</span></div><div><button onclick="delTask(${t.id})">DEL</button></div>`;act.appendChild(d)});
+    const ge=document.getElementById("genre-edit");ge.innerHTML="";DB.genres.forEach(g=>{const d=document.createElement("div");d.style.cssText=`color:#555;border:1px solid #333;padding:2px 8px;border-radius:4px;font-size:11px;`;d.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f44;margin-left:6px;">×</span>`;ge.appendChild(d)});
+    const act=document.getElementById("active");act.innerHTML="";DB.tasks.forEach(t=>{const d=document.createElement("div");d.className="task";d.innerHTML=`<div><strong>${t.title}</strong><br><span class="sub-text">${t.mode}</span></div><button onclick="delTask(${t.id})">DEL</button>`;act.appendChild(d)});
 }
 function delTask(id){DB.tasks=DB.tasks.filter(x=>x.id!==id);save();render()}
 function update(){const c=document.getElementById("code").value;if(c.length>100){document.open().write(c);document.close()}}
 
 document.getElementById("date").value=new Date().toISOString().split("T")[0]; render();
-(DB.memos||[]).forEach(d=>d.type==='m'?createSticky(d):createSticker(null,null,d));
+(DB.memos||[]).forEach(d=>d.type==='m'?createM(d):createS(null,null,d));
 </script>
 </body>
 </html>
