@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NEON STICKY & SEAL CORE</title>
+<style>
+:root {
+    --bg: #0a0a0a;
+    --panel: #111;
+    --neon-cyan: #0ff;
+    --neon-pink: #f0f;
+    --neon-green: #0f0;
+    --neon-yellow: #ff0;
+    --neon-purple: #b026ff;
+}
+body {
+    margin: 0; background: var(--bg); color: #fff;
+    font-family: 'Inter', sans-serif; overflow: hidden;
+    height: 100vh; width: 100vw;
+}
+#workspace {
+    width: 100%; height: 100%; position: relative;
+}
+#toolbar {
+    position: fixed; top: 20px; left: 20px; background: var(--panel);
+    padding: 15px; border: 1px solid #333; border-radius: 8px;
+    z-index: 1000; display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+.color-opt {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+}
+.color-opt.active { border-color: #fff; }
+
+/* Sticky Style */
+.sticky {
+    position: absolute; width: 200px; min-height: 100px;
+    background: #1a1a1a; border-left: 4px solid var(--neon-cyan);
+    padding: 10px; box-sizing: border-box; cursor: move;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column;
+}
+.sticky-header {
+    display: flex; justify-content: space-between; margin-bottom: 8px; pointer-events: none;
+}
+.mark-area { font-weight: bold; font-size: 14px; pointer-events: auto; cursor: pointer; }
+.del-btn { color: #555; cursor: pointer; pointer-events: auto; font-size: 16px;}
+.del-btn:hover { color: #f44; }
+
+.sticky-content {
+    background: transparent; border: none; color: #eee;
+    width: 100%; resize: none; font-size: 14px; line-height: 1.4;
+    overflow: hidden; outline: none; padding: 0;
+}
+
+/* Sticker Style */
+.sticker {
+    position: absolute; width: 60px; height: 60px;
+    cursor: move; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    border-radius: 50%; padding: 10px; box-sizing: border-box;
+    display: flex; justify-content: center; align-items: center;
+}
+.sticker-icon {
+    font-size: 30px;
+}
+.sticker-opt {
+    width: 40px; height: 40px; background: #000; border: 1px solid #333;
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    font-size: 20px;
+}
+.sticker-opt:hover { border-color: #aaa; }
+
+button {
+    background: transparent; border: 1px solid #555; color: #aaa;
+    padding: 8px; cursor: pointer; font-size: 11px; letter-spacing: 1px;
+}
+button:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+    <div style="font-size: 10px; color: #fff; font-weight: bold;">[MEMO_UNIT]</div>
+    <div style="display: flex; gap: 8px;">
+        <div class="color-opt active" style="background: var(--neon-cyan);" onclick="selCol(this, 'var(--neon-cyan)')"></div>
+        <div class="color-opt" style="background: var(--neon-pink);" onclick="selCol(this, 'var(--neon-pink)')"></div>
+        <div class="color-opt" style="background: var(--neon-green);" onclick="selCol(this, 'var(--neon-green)')"></div>
+    </div>
+    <button onclick="createSticky()">+ NEW MEMO</button>
+
+    <div style="font-size: 10px; color: #fff; font-weight: bold; margin-top: 10px;">[STICKER_PALETTE]</div>
+    <div style="display: flex; gap: 8px;">
+        <div class="sticker-opt" style="color:var(--neon-cyan)" onclick="createSticker('♥', 'var(--neon-cyan)')">♥</div>
+        <div class="sticker-opt" style="color:var(--neon-pink)" onclick="createSticker('★', 'var(--neon-pink)')">★</div>
+        <div class="sticker-opt" style="color:var(--neon-green)" onclick="createSticker('💡', 'var(--neon-green)')">💡</div>
+    </div>
+</div>
+
+<div id="workspace"></div>
+
+<script>
+let activeColor = 'var(--neon-cyan)';
+
+// ドラッグ機能を共通化
+function makeDraggable(el) {
+    el.onmousedown = function(e) {
+        if (e.target.tagName === 'TEXTAREA' || e.target.classList.contains('mark-area') || e.target.classList.contains('del-btn')) return;
+        
+        // シール削除用のダブルクリックを判定するためにクリック時間を記録
+        el._mouseDownTime = Date.now();
+
+        let shiftX = e.clientX - el.getBoundingClientRect().left;
+        let shiftY = e.clientY - el.getBoundingClientRect().top;
+
+        function moveAt(pageX, pageY) {
+            el.style.left = pageX - shiftX + 'px';
+            el.style.top = pageY - shiftY + 'px';
+        }
+
+        function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.onmouseup = function(e) {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.onmouseup = null;
+
+            // 移動していなければクリックとみなす
+            const timeDiff = Date.now() - el._mouseDownTime;
+            if (timeDiff < 200) { // 200ms以内はクリック
+                // シールの場合のみ削除判定
+                if (el.classList.contains('sticker')) {
+                    // ここでダブルクリック判定をするのは複雑なので、今回は削除ボタンを作る方法で対応します
+                }
+            }
+            saveAll();
+        };
+    };
+    el.ondragstart = () => false;
+}
+
+function selCol(el, color) {
+    document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
+    activeColor = color;
+}
+
+// --- MEMO (STICKY) ---
+function createSticky(data = null) {
+    const s = document.createElement('div');
+    s.className = 'sticky';
+    s.id = data ? data.id : 'm' + Date.now();
+    s.style.left = data ? data.x : '120px';
+    s.style.top = data ? data.y : '50px';
+    s.style.borderLeftColor = data ? data.color : activeColor;
+
+    const marks = ["", "!", "?", "★"];
+    let currentMarkIdx = data ? marks.indexOf(data.mark) : 0;
+
+    s.innerHTML = `
+        <div class="sticky-header">
+            <div class="mark-area" style="color:${s.style.borderLeftColor}">${data ? data.mark : ""}</div>
+            <div class="del-btn" onclick="removeItem('${s.id}')">×</div>
+        </div>
+        <textarea class="sticky-content" placeholder="Type command...">${data ? data.content : ""}</textarea>
+    `;
+
+    const markArea = s.querySelector('.mark-area');
+    markArea.onclick = () => {
+        currentMarkIdx = (currentMarkIdx + 1) % marks.length;
+        markArea.innerText = marks[currentMarkIdx];
+        saveAll();
+    };
+
+    const textarea = s.querySelector('textarea');
+    textarea.oninput = () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        saveAll();
+    };
+
+    makeDraggable(s);
+    document.getElementById('workspace').appendChild(s);
+    textarea.style.height = textarea.scrollHeight + 'px';
+    saveAll(); // 新規作成時は即時保存
+}
+
+// --- STICKER ---
+function createSticker(icon, color, data = null) {
+    const s = document.createElement('div');
+    s.className = 'sticker';
+    s.id = data ? data.id : 's' + Date.now();
+    s.style.left = data ? data.x : (window.innerWidth / 2) + 'px'; // 中央に配置
+    s.style.top = data ? data.y : (window.innerHeight / 2) + 'px';
+    
+    // ネオンカラーのボーダーとシャドウを設定
+    s.style.border = `2px solid ${color}`;
+    s.style.boxShadow = `0 0 10px ${color}, 0 0 5px ${color}`;
+
+    s.innerHTML = `
+        <div class="sticker-icon" style="color:${color}">${data ? data.icon : icon}</div>
+        <div class="del-btn" style="position: absolute; top: -10px; right: -10px; color:#aaa; cursor:pointer;" onclick="removeItem('${s.id}')">×</div>
+    `;
+
+    makeDraggable(s);
+    document.getElementById('workspace').appendChild(s);
+    saveAll(); // 新規作成時は即時保存
+}
+
+function removeItem(id) {
+    if(confirm("Delete this?")) {
+        document.getElementById(id).remove();
+        saveAll();
+    }
+}
+
+// --- DATA SAVE/LOAD ---
+function saveAll() {
+    const memos = Array.from(document.querySelectorAll('.sticky')).map(s => ({
+        type: 'memo',
+        id: s.id,
+        x: s.style.left, y: s.style.top,
+        color: s.style.borderLeftColor,
+        content: s.querySelector('textarea').value,
+        mark: s.querySelector('.mark-area').innerText
+    }));
+
+    const stickers = Array.from(document.querySelectorAll('.sticker')).map(s => ({
+        type: 'sticker',
+        id: s.id,
+        x: s.style.left, y: s.style.top,
+        icon: s.querySelector('.sticker-icon').innerText,
+        color: s.querySelector('.sticker-icon').style.color
+    }));
+
+    localStorage.setItem("NEON_STICKY_SEAL_DB", JSON.stringify([...memos, ...stickers]));
+}
+
+function loadAll() {
+    const DB = JSON.parse(localStorage.getItem("NEON_STICKY_SEAL_DB")) || [];
+    DB.forEach(data => {
+        if (data.type === 'memo') createSticky(data);
+        if (data.type === 'sticker') createSticker(null, null, data);
+    });
+}
+
+// 初期ロード
+loadAll();
+</script>
+</body>
+</html>
