@@ -90,4 +90,190 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
                 <div class="input-group" style="justify-content: center;">
                     <input type="time" id="al-time" step="1">
                     <button onclick="alSet()" style="border-color: var(--warning); color: var(--warning);">ENGAGE</button>
-                    <button onclick="alStop()">KILL
+                    <button onclick="alStop()">KILL</button>
+                </div>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:10px; font-size:11px;">
+                    <label><input type="checkbox" id="pre-5" checked> 5m</label>
+                    <label><input type="checkbox" id="pre-1" checked> 1m</label>
+                    <label><input type="checkbox" id="pre-0" checked> Now</label>
+                </div>
+                <p id="al-status" class="sub-text" style="text-align: center; margin-top: 15px;">STANDBY</p>
+            </div>
+            <div class="box time-unit" style="border-top: 3px solid var(--accent);">
+                <h3 class="sub-text" style="color:var(--accent);">STOPWATCH</h3>
+                <div id="sw-display" class="timer-display" style="color:var(--accent);">00:00:00.0</div>
+                <div style="display: flex; gap: 5px; justify-content: center;">
+                    <button onclick="swStart()">START</button>
+                    <button onclick="swStop()">STOP</button>
+                    <button onclick="swLap()">LAP</button>
+                    <button onclick="swReset()">RESET</button>
+                </div>
+                <div id="sw-laps" class="lap-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sc-s" style="display:none;">
+        <h2>CORE_CONFIG</h2>
+        <div class="box">
+            <textarea id="code" style="width:100%; height:400px; font-family:'Consolas',monospace;"></textarea>
+            <button onclick="update()" style="width:100%; margin-top:10px;">Apply Core Update</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const workerCode = `
+    let timer = null;
+    self.onmessage = function(e) {
+        if (e.data === 'start') {
+            if (!timer) timer = setInterval(() => self.postMessage('tick'), 100);
+        } else if (e.data === 'stop') {
+            clearInterval(timer);
+            timer = null;
+        }
+    };
+`;
+const worker = new Worker(URL.createObjectURL(new Blob([workerCode], {type: 'application/javascript'})));
+
+let DB = JSON.parse(localStorage.getItem("NEON_DB")) || {tasks:[], done:[], genres:["Work","Personal","Hobby"]};
+function save(){localStorage.setItem("NEON_DB",JSON.stringify(DB));}
+
+function sw(s){
+    ["sc-t","sc-time","sc-s"].forEach(id=>document.getElementById(id).style.display="none");
+    document.getElementById("sc-"+s).style.display="block";
+    document.querySelectorAll(".nav-btn").forEach((btn,idx)=>btn.classList.toggle("active", (s==='t'&&idx===0)||(s==='time'&&idx===1)||(s==='s'&&idx===2)));
+}
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let alarmLoop = null;
+function beep(freq, duration) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+function startAlarmSound() {
+    if(alarmLoop) return;
+    alarmLoop = setInterval(() => {
+        for(let i=0; i<4; i++) setTimeout(() => beep(880, 0.1), i*150);
+    }, 1000);
+}
+
+let swTime = 0, swRunning = false;
+let alTarget = null, alFlags = {m5:false, m1:false};
+
+worker.onmessage = () => {
+    if (swRunning) { swTime += 100; swUpdate(); }
+    if (alTarget) alUpdate();
+};
+
+function swStart(){ swRunning = true; worker.postMessage('start'); }
+function swStop(){ swRunning = false; if(!alTarget) worker.postMessage('stop'); }
+function swReset(){ swStop(); swTime=0; document.getElementById("sw-laps").innerHTML=""; swUpdate(); }
+function swUpdate(){
+    const ms=Math.floor((swTime%1000)/100), s=Math.floor((swTime/1000)%60), m=Math.floor((swTime/(1000*60))%60), h=Math.floor(swTime/(1000*60*60));
+    document.getElementById("sw-display").innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms}`;
+}
+
+function swLap(){
+    if(swTime === 0) return;
+    const lap = document.createElement("div"); lap.className="lap-item";
+    const record = document.getElementById("sw-display").innerText;
+    lap.innerHTML=`<span>RECORD ${document.getElementById("sw-laps").children.length+1}</span><span>${record}</span>`;
+    document.getElementById("sw-laps").prepend(lap);
+    swTime = 0; // ここでリセット
+    swUpdate();
+}
+
+function alSet(){
+    const val=document.getElementById("al-time").value; if(!val) return;
+    const [h, m, s] = val.split(":").map(Number);
+    const now = new Date(); alTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, s || 0);
+    if(alTarget < now) alTarget.setDate(alTarget.getDate()+1);
+    alFlags = {m5: false, m1: false};
+    document.getElementById("al-status").innerText = "TRACKING: " + val;
+    worker.postMessage('start');
+}
+function alUpdate(){
+    const now = new Date(); const diff = alTarget - now;
+    if(diff <= 0){
+        if(document.getElementById("pre-0").checked) {
+            document.getElementById("body").classList.add("critical-alarm");
+            startAlarmSound();
+        }
+        document.getElementById("al-status").innerText = "SIGNAL DETECTED";
+        alTarget = null; if(!swRunning) worker.postMessage('stop');
+    } else {
+        const h=Math.floor(diff/(1000*60*60)), m=Math.floor((diff/(1000*60))%60), s=Math.floor((diff/1000)%60);
+        document.getElementById("al-display").innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if(diff <= 300000 && diff > 299000 && !alFlags.m5 && document.getElementById("pre-5").checked) { alFlags.m5 = true; beep(440, 0.2); setTimeout(()=>beep(440,0.2), 300); }
+        if(diff <= 60000 && diff > 59000 && !alFlags.m1 && document.getElementById("pre-1").checked) { alFlags.m1 = true; beep(660, 0.2); setTimeout(()=>beep(660,0.2), 300); }
+    }
+}
+function alStop(){
+    alTarget = null; clearInterval(alarmLoop); alarmLoop = null;
+    document.getElementById("body").classList.remove("critical-alarm");
+    document.getElementById("al-display").innerText = "00:00:00"; document.getElementById("al-status").innerText = "STANDBY";
+    if(!swRunning) worker.postMessage('stop');
+}
+
+const genreColors=["#0ff", "#b026ff", "#f0f", "#ff0", "#0f0", "#f80", "#08f", "#7fff00"];
+function addTask(){
+    const t=document.getElementById("title").value.trim(); if(!t)return;
+    DB.tasks.push({id:Date.now(), title:t, mode:document.getElementById("mode").value, genre:document.getElementById("genre").value, date:document.getElementById("date").value});
+    document.getElementById("title").value=""; save(); render();
+}
+function addGenre(){
+    const g=document.getElementById("new-genre-input").value.trim(); if(!g||DB.genres.includes(g))return;
+    DB.genres.push(g); document.getElementById("new-genre-input").value=""; save(); render();
+}
+function delGenre(g){ if(confirm(`Delete ${g}?`)){ DB.genres=DB.genres.filter(x=>x!==g); save(); render(); }}
+
+function render(){
+    const gs=document.getElementById("genre"); const cur=gs.value; gs.innerHTML="";
+    DB.genres.forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; gs.appendChild(o); });
+    if(DB.genres.includes(cur)) gs.value=cur;
+    const ge=document.getElementById("genre-edit"); ge.innerHTML="";
+    DB.genres.forEach(g=>{
+        const c=genreColors[DB.genres.indexOf(g)%8];
+        const d=document.createElement("div"); d.style.cssText=`color:${c}; border:1px solid ${c}; padding:2px 8px; border-radius:4px; font-size:11px;`;
+        d.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f44;margin-left:6px;">×</span>`;
+        ge.appendChild(d);
+    });
+    const act=document.getElementById("active"); act.innerHTML="";
+    DB.tasks.sort((a,b)=>(a.date||"9").localeCompare(b.date||"9")).forEach(t=>{
+        const c=genreColors[DB.genres.indexOf(t.genre)%8];
+        const isU=t.mode==='once'&&t.date&&t.date<=(new Date().toISOString().split('T')[0]);
+        const d=document.createElement("div"); d.className="task"; d.style.borderLeft=`3px solid ${c}`;
+        d.innerHTML=`<div><strong><span style="color:${c}">[${t.genre}]</span> ${t.title}</strong><br><span class="sub-text ${isU?'alert-due':''}">${t.mode.toUpperCase()} / ${t.date||"N/A"}</span></div>
+        <div><button onclick="doneTask(${t.id})">DONE</button><button onclick="delTask(${t.id})" style="border-color:#333;margin-left:5px;">DEL</button></div>`;
+        act.appendChild(d);
+    });
+}
+
+function doneTask(id){
+    const t=DB.tasks.find(x=>x.id===id); if(!t)return;
+    if(t.mode==='once'){
+        DB.done.unshift(t);
+    } else {
+        let next = new Date(t.date || new Date());
+        if(t.mode==='daily') next.setDate(next.getDate()+1);
+        else if(t.mode==='weekdays'){
+            do { next.setDate(next.getDate()+1); } while(next.getDay()===0 || next.getDay()===6);
+        } else if(t.mode==='monthly') next.setMonth(next.getMonth()+1);
+        DB.tasks.push({id:Date.now(), title:t.title, mode:t.mode, genre:t.genre, date:next.toISOString().split('T')[0]});
+    }
+    DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render();
+}
+
+function delTask(id){ DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render(); }
+function update(){ const c=document.getElementById("code").value; if(c.length>100){ const n=document.open("text/html","replace"); n.write(c); n.close(); } }
+document.getElementById("date").value=new Date().toISOString().split("T")[0];
+render();
+</script>
+</body>
+</html>
