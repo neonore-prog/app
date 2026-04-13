@@ -77,7 +77,11 @@ button:hover{ border-color:var(--accent); color:var(--accent); }
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
+        
+        <h3 class="sub-text">ACTIVE_MISSIONS</h3>
         <div id="active"></div>
+        
+        <h3 class="sub-text" style="margin-top:40px;">ARCHIVE</h3>
         <div id="done"></div>
     </div>
 
@@ -185,7 +189,7 @@ function swLap(){
     const record = document.getElementById("sw-display").innerText;
     lap.innerHTML=`<span>RECORD ${document.getElementById("sw-laps").children.length+1}</span><span>${record}</span>`;
     document.getElementById("sw-laps").prepend(lap);
-    swTime = 0; // ここでリセット
+    swTime = 0;
     swUpdate();
 }
 
@@ -244,6 +248,8 @@ function render(){
         d.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f44;margin-left:6px;">×</span>`;
         ge.appendChild(d);
     });
+
+    // Active List
     const act=document.getElementById("active"); act.innerHTML="";
     DB.tasks.sort((a,b)=>(a.date||"9").localeCompare(b.date||"9")).forEach(t=>{
         const c=genreColors[DB.genres.indexOf(t.genre)%8];
@@ -253,24 +259,44 @@ function render(){
         <div><button onclick="doneTask(${t.id})">DONE</button><button onclick="delTask(${t.id})" style="border-color:#333;margin-left:5px;">DEL</button></div>`;
         act.appendChild(d);
     });
+
+    // Archive List
+    const dn=document.getElementById("done"); dn.innerHTML="";
+    if(!DB.done) DB.done = [];
+    DB.done.forEach(t=>{
+        const c=genreColors[DB.genres.indexOf(t.genre)%8] || "#555";
+        const d=document.createElement("div"); d.className="task completed"; d.style.borderLeft=`3px solid #222`;
+        d.innerHTML=`<div><span style="color:var(--sub)">[${t.genre}] ${t.title}</span></div>
+        <div><button onclick="copyTask(${t.id})">COPY</button><button onclick="delDone(${t.id})" style="border-color:#333;margin-left:5px;">DEL</button></div>`;
+        dn.appendChild(d);
+    });
 }
 
 function doneTask(id){
     const t=DB.tasks.find(x=>x.id===id); if(!t)return;
     if(t.mode==='once'){
+        if(!DB.done) DB.done = [];
         DB.done.unshift(t);
+        if(DB.done.length > 50) DB.done.pop(); // Max 50 archive
     } else {
-        let next = new Date(t.date || new Date());
+        let current = t.date ? new Date(t.date) : new Date();
+        let next = new Date(current);
         if(t.mode==='daily') next.setDate(next.getDate()+1);
         else if(t.mode==='weekdays'){
             do { next.setDate(next.getDate()+1); } while(next.getDay()===0 || next.getDay()===6);
         } else if(t.mode==='monthly') next.setMonth(next.getMonth()+1);
-        DB.tasks.push({id:Date.now(), title:t.title, mode:t.mode, genre:t.genre, date:next.toISOString().split('T')[0]});
+        DB.tasks.push({...t, id:Date.now(), date:next.toISOString().split('T')[0]});
     }
     DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render();
 }
 
 function delTask(id){ DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render(); }
+function delDone(id){ DB.done=DB.done.filter(x=>x.id!==id); save(); render(); }
+function copyTask(id){
+    const t=DB.done.find(x=>x.id===id); if(!t)return;
+    DB.tasks.push({...t, id:Date.now(), date:new Date().toISOString().split('T')[0]});
+    save(); render();
+}
 function update(){ const c=document.getElementById("code").value; if(c.length>100){ const n=document.open("text/html","replace"); n.write(c); n.close(); } }
 document.getElementById("date").value=new Date().toISOString().split("T")[0];
 render();
