@@ -2,142 +2,61 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>NEON CORE: PRIME</title>
+<title>NEON CORE: PRIME - ULTIMATE</title>
 <style>
 :root {
-    --bg: #0a0a0a;
-    --text: #e0e0e0;
-    --sub: #666;
-    --accent: #0ff;
-    --danger: #ff3131; /* 警告専用色として固定 */
-    --neon-purple: #b026ff;
+    --bg: #0a0a0a; --text: #e0e0e0; --sub: #666; --accent: #0ff;
+    --danger: #ff3131; --warning: #f80; --neon-purple: #b026ff;
 }
 body {
-    margin:0;
-    background: var(--bg);
-    color: var(--text);
+    margin:0; background: var(--bg); color: var(--text);
     font-family:'Inter','Segoe UI','Meiryo',sans-serif;
-    display:flex;
-    height:100vh;
+    display:flex; height:100vh; overflow: hidden;
 }
 #nav{
-    width:70px;
-    background:#111;
-    border-right:1px solid #222;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding-top:30px;
+    width:70px; background:#111; border-right:1px solid #222;
+    display:flex; flex-direction:column; align-items:center; padding-top:30px;
 }
 .nav-btn{
-    width:44px;height:44px;
-    border:1px solid #333;
-    margin-bottom:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
-    color:var(--sub);
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:1px;
+    width:44px; height:44px; border:1px solid #333; margin-bottom:20px;
+    display:flex; justify-content:center; align-items:center;
+    cursor:pointer; color:var(--sub); font-size:9px; font-weight:900; letter-spacing:1px;
 }
-.nav-btn.active{border-color:var(--accent);color:var(--accent);box-shadow: 0 0 10px rgba(0,255,255,0.2);}
-#main{
-    flex:1;
-    padding:30px 40px;
-    overflow-y:auto;
-}
-h2{
-    font-weight:200;
-    font-size:2rem;
-    margin:0 0 30px 0;
-    color:#fff;
-    letter-spacing: 2px;
-}
-.box{
-    background:#111;
-    border:1px solid #222;
-    padding:20px;
-    margin-bottom:20px;
-    border-radius:4px;
-}
-.input-group{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
-}
-input, select, textarea{
-    background:#000;
-    border:1px solid #222;
-    color:#fff;
-    padding:8px 12px;
-    font-size:14px;
-    border-radius:2px;
-}
-input:focus, select:focus{
-    border-color:var(--accent);
-    outline: none;
-}
-button{
-    background:transparent;
-    border:1px solid #555;
-    color:#aaa;
-    padding:6px 10px;
-    font-size:11px;
-    cursor:pointer;
-    transition: 0.2s;
-}
-button:hover{
-    border-color:var(--accent);
-    color:var(--accent);
-}
-.task{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 14px;
-    margin:6px 0;
-    border:1px solid #222;
-    border-left:3px solid #444;
-    border-radius:4px;
-    background:#0a0a0a;
-}
-.task-info strong{
-    font-size:1rem;
-}
-.sub-text{
-    font-size:11px;
-    color:var(--sub);
-}
-.genre-tag-small{
-    font-size:10px;
-    font-weight:bold;
-    margin-right:6px;
-}
+.nav-btn.active{border-color:var(--accent); color:var(--accent); box-shadow: 0 0 10px rgba(0,255,255,0.2);}
 
-/* 期限アラートアニメーション（赤色専用） */
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1; }
+#main{ flex:1; padding:30px 40px; overflow-y:auto; }
+h2{ font-weight:200; font-size:2rem; margin:0 0 30px 0; color:#fff; letter-spacing: 2px; }
+.box{ background:#111; border:1px solid #222; padding:20px; margin-bottom:20px; border-radius:4px; }
+.input-group{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+input, select, textarea{ background:#000; border:1px solid #222; color:#fff; padding:8px 12px; font-size:14px; border-radius:2px; }
+button{ background:transparent; border:1px solid #555; color:#aaa; padding:6px 10px; font-size:11px; cursor:pointer; }
+button:hover{ border-color:var(--accent); color:var(--accent); }
+
+.task{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin:6px 0; border:1px solid #222;
+    border-left:3px solid #444; border-radius:4px; background:#0a0a0a;
 }
-.alert-due {
-    color: var(--danger) !important;
-    font-weight: bold;
-    animation: blink 0.8s infinite;
-}
-.completed {
-    opacity: 0.5;
-}
+.sub-text{ font-size:11px; color:var(--sub); }
+.timer-display{ font-size: 4rem; font-weight: 100; font-family: 'Courier New', monospace; text-align: center; margin: 15px 0; }
+.lap-list{ max-height: 120px; overflow-y: auto; border-top: 1px solid #222; margin-top: 10px; }
+.lap-item{ padding: 5px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; display: flex; justify-content: space-between; }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+.alert-due { color: var(--danger) !important; font-weight: bold; animation: blink 0.8s infinite; }
+@keyframes screen-alert { 0%, 100% { background: #0a0a0a; } 50% { background: #410; } }
+.critical-alarm { animation: screen-alert 0.4s infinite !important; }
+.time-unit { flex: 0 0 40%; max-width: 450px; }
+.completed { opacity: 0.5; }
 </style>
 </head>
-<body>
+<body id="body">
+
 <div id="nav">
     <div class="nav-btn active" onclick="sw('t')">TASK</div>
+    <div class="nav-btn" onclick="sw('time')">TIME</div>
     <div class="nav-btn" onclick="sw('s')">CORE</div>
 </div>
+
 <div id="main">
     <div id="sc-t">
         <h2>MISSION_CONTROL</h2>
@@ -145,14 +64,12 @@ button:hover{
             <div class="input-group">
                 <input id="title" placeholder="WHAT NEEDS TO BE DONE?" style="flex:1;">
                 <select id="mode">
-                    <option value="once">ONCE</option>
-                    <option value="daily">DAILY</option>
-                    <option value="weekdays">WEEKDAYS</option>
-                    <option value="monthly">MONTHLY</option>
+                    <option value="once">ONCE</option><option value="daily">DAILY</option>
+                    <option value="weekdays">WEEKDAYS</option><option value="weekly">WEEKLY</option><option value="monthly">MONTHLY</option>
                 </select>
                 <select id="genre"></select>
                 <input type="date" id="date">
-                <button onclick="add()">ADD_TASK</button>
+                <button onclick="addTask()">ADD_TASK</button>
             </div>
             <div class="input-group" style="margin-top:10px;">
                 <input id="new-genre-input" placeholder="NEW CATEGORY" maxlength="20">
@@ -160,213 +77,228 @@ button:hover{
             </div>
             <div id="genre-edit" style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
         </div>
-        <h3 class="sub-text" style="color:#fff; font-size:12px; letter-spacing:1px; margin-bottom:15px;">ACTIVE_OPERATIONS</h3>
+        
+        <h3 class="sub-text">ACTIVE_MISSIONS</h3>
         <div id="active"></div>
-        <h3 class="sub-text" style="margin-top:40px; border-top:1px solid #222; padding-top:20px;">ARCHIVED_LOGS (ONCE only)</h3>
+        
+        <h3 class="sub-text" style="margin-top:40px;">ARCHIVE</h3>
         <div id="done"></div>
     </div>
+
+    <div id="sc-time" style="display:none;">
+        <h2>CHRONO_UNIT</h2>
+        <div style="display: flex; gap: 20px;">
+            <div class="box time-unit" style="border-top: 3px solid var(--warning);">
+                <h3 class="sub-text" style="color:var(--warning);">ALARM / NOTIFIER</h3>
+                <div id="al-display" class="timer-display" style="color:var(--warning);">00:00:00</div>
+                <div class="input-group" style="justify-content: center;">
+                    <input type="time" id="al-time" step="1">
+                    <button onclick="alSet()" style="border-color: var(--warning); color: var(--warning);">ENGAGE</button>
+                    <button onclick="alStop()">KILL</button>
+                </div>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:10px; font-size:11px;">
+                    <label><input type="checkbox" id="pre-5" checked> 5m</label>
+                    <label><input type="checkbox" id="pre-1" checked> 1m</label>
+                    <label><input type="checkbox" id="pre-0" checked> Now</label>
+                </div>
+                <p id="al-status" class="sub-text" style="text-align: center; margin-top: 15px;">STANDBY</p>
+            </div>
+            <div class="box time-unit" style="border-top: 3px solid var(--accent);">
+                <h3 class="sub-text" style="color:var(--accent);">STOPWATCH</h3>
+                <div id="sw-display" class="timer-display" style="color:var(--accent);">00:00:00.0</div>
+                <div style="display: flex; gap: 5px; justify-content: center;">
+                    <button onclick="swStart()">START</button>
+                    <button onclick="swStop()">STOP</button>
+                    <button onclick="swLap()">LAP</button>
+                    <button onclick="swReset()">RESET</button>
+                </div>
+                <div id="sw-laps" class="lap-list"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="sc-s" style="display:none;">
         <h2>CORE_CONFIG</h2>
         <div class="box">
-            <textarea id="code" style="width:100%; height:400px; font-family:'Consolas',monospace; border-color:#333;"></textarea>
+            <textarea id="code" style="width:100%; height:400px; font-family:'Consolas',monospace;"></textarea>
             <button onclick="update()" style="width:100%; margin-top:10px;">Apply Core Update</button>
         </div>
     </div>
 </div>
 
 <script>
-let raw=localStorage.getItem("NEON_DB");
-let DB;
-try{DB=JSON.parse(raw)||{};}catch{DB={};}
-if(!DB.tasks) DB.tasks=[];
-if(!DB.done) DB.done=[];
-if(!DB.genres) DB.genres=["Work","Personal","Hobby"];
+const workerCode = `
+    let timer = null;
+    self.onmessage = function(e) {
+        if (e.data === 'start') {
+            if (!timer) timer = setInterval(() => self.postMessage('tick'), 100);
+        } else if (e.data === 'stop') {
+            clearInterval(timer);
+            timer = null;
+        }
+    };
+`;
+const worker = new Worker(URL.createObjectURL(new Blob([workerCode], {type: 'application/javascript'})));
 
+let DB = JSON.parse(localStorage.getItem("NEON_DB")) || {tasks:[], done:[], genres:["Work","Personal","Hobby"]};
 function save(){localStorage.setItem("NEON_DB",JSON.stringify(DB));}
 
 function sw(s){
-    document.getElementById("sc-t").style.display=s==="t"?"block":"none";
-    document.getElementById("sc-s").style.display=s==="s"?"block":"none";
-    document.querySelectorAll(".nav-btn").forEach((btn,idx)=>{
-        btn.classList.remove("active");
-        if((s==="t"&&idx===0)||(s==="s"&&idx===1)) btn.classList.add("active");
-    });
+    ["sc-t","sc-time","sc-s"].forEach(id=>document.getElementById(id).style.display="none");
+    document.getElementById("sc-"+s).style.display="block";
+    document.querySelectorAll(".nav-btn").forEach((btn,idx)=>btn.classList.toggle("active", (s==='t'&&idx===0)||(s==='time'&&idx===1)||(s==='s'&&idx===2)));
 }
 
-// 警告色(赤)を除外したカラーパレット
-const genreColors=["#0ff", "#b026ff", "#f0f", "#ff0", "#0f0", "#f80", "#08f", "#7fff00"];
-function getGenreColor(genre){return genreColors[DB.genres.indexOf(genre)%genreColors.length]||"#0ff";}
-
-function add(){
-    const tInput=document.getElementById("title");
-    const title=tInput.value.trim();
-    if(!title)return;
-    const mode=document.getElementById("mode").value;
-    const genre=document.getElementById("genre").value;
-    const date=document.getElementById("date").value;
-    DB.tasks.push({id:Date.now(),title,mode,genre,date});
-    tInput.value="";
-    save();
-    render();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let alarmLoop = null;
+function beep(freq, duration) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+function startAlarmSound() {
+    if(alarmLoop) return;
+    alarmLoop = setInterval(() => {
+        for(let i=0; i<4; i++) setTimeout(() => beep(880, 0.1), i*150);
+    }, 1000);
 }
 
-function getNextDate(currentDateStr, mode) {
-    let date = currentDateStr ? new Date(currentDateStr) : new Date();
-    if (isNaN(date.getTime())) date = new Date();
-    if (mode === 'daily') {
-        date.setDate(date.getDate() + 1);
-    } else if (mode === 'weekdays') {
-        do { date.setDate(date.getDate() + 1); } while (date.getDay() === 0 || date.getDay() === 6);
-    } else if (mode === 'monthly') {
-        date.setMonth(date.getMonth() + 1);
+let swTime = 0, swRunning = false;
+let alTarget = null, alFlags = {m5:false, m1:false};
+
+worker.onmessage = () => {
+    if (swRunning) { swTime += 100; swUpdate(); }
+    if (alTarget) alUpdate();
+};
+
+function swStart(){ swRunning = true; worker.postMessage('start'); }
+function swStop(){ swRunning = false; if(!alTarget) worker.postMessage('stop'); }
+function swReset(){ swStop(); swTime=0; document.getElementById("sw-laps").innerHTML=""; swUpdate(); }
+function swUpdate(){
+    const ms=Math.floor((swTime%1000)/100), s=Math.floor((swTime/1000)%60), m=Math.floor((swTime/(1000*60))%60), h=Math.floor(swTime/(1000*60*60));
+    document.getElementById("sw-display").innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms}`;
+}
+
+function swLap(){
+    if(swTime === 0) return;
+    const lap = document.createElement("div"); lap.className="lap-item";
+    const record = document.getElementById("sw-display").innerText;
+    lap.innerHTML=`<span>RECORD ${document.getElementById("sw-laps").children.length+1}</span><span>${record}</span>`;
+    document.getElementById("sw-laps").prepend(lap);
+    swTime = 0;
+    swUpdate();
+}
+
+function alSet(){
+    const val=document.getElementById("al-time").value; if(!val) return;
+    const [h, m, s] = val.split(":").map(Number);
+    const now = new Date(); alTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, s || 0);
+    if(alTarget < now) alTarget.setDate(alTarget.getDate()+1);
+    alFlags = {m5: false, m1: false};
+    document.getElementById("al-status").innerText = "TRACKING: " + val;
+    worker.postMessage('start');
+}
+function alUpdate(){
+    const now = new Date(); const diff = alTarget - now;
+    if(diff <= 0){
+        if(document.getElementById("pre-0").checked) {
+            document.getElementById("body").classList.add("critical-alarm");
+            startAlarmSound();
+        }
+        document.getElementById("al-status").innerText = "SIGNAL DETECTED";
+        alTarget = null; if(!swRunning) worker.postMessage('stop');
+    } else {
+        const h=Math.floor(diff/(1000*60*60)), m=Math.floor((diff/(1000*60))%60), s=Math.floor((diff/1000)%60);
+        document.getElementById("al-display").innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if(diff <= 300000 && diff > 299000 && !alFlags.m5 && document.getElementById("pre-5").checked) { alFlags.m5 = true; beep(440, 0.2); setTimeout(()=>beep(440,0.2), 300); }
+        if(diff <= 60000 && diff > 59000 && !alFlags.m1 && document.getElementById("pre-1").checked) { alFlags.m1 = true; beep(660, 0.2); setTimeout(()=>beep(660,0.2), 300); }
     }
-    return date.toISOString().split('T')[0];
+}
+function alStop(){
+    alTarget = null; clearInterval(alarmLoop); alarmLoop = null;
+    document.getElementById("body").classList.remove("critical-alarm");
+    document.getElementById("al-display").innerText = "00:00:00"; document.getElementById("al-status").innerText = "STANDBY";
+    if(!swRunning) worker.postMessage('stop');
+}
+
+const genreColors=["#0ff", "#b026ff", "#f0f", "#ff0", "#0f0", "#f80", "#08f", "#7fff00"];
+function addTask(){
+    const t=document.getElementById("title").value.trim(); if(!t)return;
+    DB.tasks.push({id:Date.now(), title:t, mode:document.getElementById("mode").value, genre:document.getElementById("genre").value, date:document.getElementById("date").value});
+    document.getElementById("title").value=""; save(); render();
+}
+function addGenre(){
+    const g=document.getElementById("new-genre-input").value.trim(); if(!g||DB.genres.includes(g))return;
+    DB.genres.push(g); document.getElementById("new-genre-input").value=""; save(); render();
+}
+function delGenre(g){ if(confirm(`Delete ${g}?`)){ DB.genres=DB.genres.filter(x=>x!==g); save(); render(); }}
+
+function render(){
+    const gs=document.getElementById("genre"); const cur=gs.value; gs.innerHTML="";
+    DB.genres.forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; gs.appendChild(o); });
+    if(DB.genres.includes(cur)) gs.value=cur;
+    const ge=document.getElementById("genre-edit"); ge.innerHTML="";
+    DB.genres.forEach(g=>{
+        const c=genreColors[DB.genres.indexOf(g)%8];
+        const d=document.createElement("div"); d.style.cssText=`color:${c}; border:1px solid ${c}; padding:2px 8px; border-radius:4px; font-size:11px;`;
+        d.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f44;margin-left:6px;">×</span>`;
+        ge.appendChild(d);
+    });
+
+    const act=document.getElementById("active"); act.innerHTML="";
+    DB.tasks.sort((a,b)=>(a.date||"9").localeCompare(b.date||"9")).forEach(t=>{
+        const c=genreColors[DB.genres.indexOf(t.genre)%8];
+        const isU=t.mode==='once'&&t.date&&t.date<=(new Date().toISOString().split('T')[0]);
+        const d=document.createElement("div"); d.className="task"; d.style.borderLeft=`3px solid ${c}`;
+        d.innerHTML=`<div><strong><span style="color:${c}">[${t.genre}]</span> ${t.title}</strong><br><span class="sub-text ${isU?'alert-due':''}">${t.mode.toUpperCase()} / ${t.date||"N/A"}</span></div>
+        <div><button onclick="doneTask(${t.id})">DONE</button><button onclick="delTask(${t.id})" style="border-color:#333;margin-left:5px;">DEL</button></div>`;
+        act.appendChild(d);
+    });
+
+    const dn=document.getElementById("done"); dn.innerHTML="";
+    if(!DB.done) DB.done = [];
+    DB.done.forEach(t=>{
+        const c=genreColors[DB.genres.indexOf(t.genre)%8] || "#555";
+        const d=document.createElement("div"); d.className="task completed"; d.style.borderLeft=`3px solid #222`;
+        d.innerHTML=`<div><span style="color:var(--sub)">[${t.genre}] ${t.title}</span></div>
+        <div><button onclick="copyTask(${t.id})">COPY</button><button onclick="delDone(${t.id})" style="border-color:#333;margin-left:5px;">DEL</button></div>`;
+        dn.appendChild(d);
+    });
 }
 
 function doneTask(id){
-    const t=DB.tasks.find(x=>x.id===id);
-    if(!t)return;
-    if (t.mode !== 'once') {
-        const nextDate = getNextDate(t.date, t.mode);
-        DB.tasks.push({ id: Date.now() + 1, title: t.title, mode: t.mode, genre: t.genre, date: nextDate });
+    const t=DB.tasks.find(x=>x.id===id); if(!t)return;
+    if(t.mode==='once'){
+        if(!DB.done) DB.done = [];
+        DB.done.unshift(t);
+        if(DB.done.length > 50) DB.done.pop();
     } else {
-        DB.done.unshift({...t, completedAt: Date.now()});
+        let current = t.date ? new Date(t.date) : new Date();
+        let next = new Date(current);
+        if(t.mode==='daily') next.setDate(next.getDate()+1);
+        else if(t.mode==='weekdays'){
+            do { next.setDate(next.getDate()+1); } while(next.getDay()===0 || next.getDay()===6);
+        } else if(t.mode==='weekly') next.setDate(next.getDate()+7);
+        else if(t.mode==='monthly') next.setMonth(next.getMonth()+1);
+        DB.tasks.push({...t, id:Date.now(), date:next.toISOString().split('T')[0]});
     }
-    DB.tasks=DB.tasks.filter(x=>x.id!==id);
-    save();
-    render();
+    DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render();
 }
 
-function delTask(id){
-    DB.tasks=DB.tasks.filter(x=>x.id!==id);
-    save();
-    render();
+function delTask(id){ DB.tasks=DB.tasks.filter(x=>x.id!==id); save(); render(); }
+function delDone(id){ DB.done=DB.done.filter(x=>x.id!==id); save(); render(); }
+function copyTask(id){
+    const t=DB.done.find(x=>x.id===id); if(!t)return;
+    DB.tasks.push({...t, id:Date.now(), date:new Date().toISOString().split('T')[0]});
+    save(); render();
 }
-
-function delDone(id){
-    DB.done=DB.done.filter(x=>x.id!==id);
-    save();
-    render();
-}
-
-function restoreDone(id){
-    const t=DB.done.find(x=>x.id===id);
-    if(!t)return;
-    DB.done=DB.done.filter(x=>x.id!==id);
-    DB.tasks.push({...t, id:Date.now()});
-    save();
-    render();
-}
-
-function addGenre(){
-    const input=document.getElementById("new-genre-input");
-    const g=input.value.trim();
-    if(!g||DB.genres.includes(g))return;
-    DB.genres.push(g);
-    input.value="";
-    save();
-    render();
-}
-
-function delGenre(g){
-    if(!confirm(`Delete genre: ${g}?`))return;
-    DB.genres=DB.genres.filter(x=>x!==g);
-    save();
-    render();
-}
-
-function render(){
-    const gSelect=document.getElementById("genre");
-    const currentGenre = gSelect.value;
-    gSelect.innerHTML="";
-    DB.genres.forEach(g=>{
-        const o=document.createElement("option"); o.value=g; o.textContent=g;
-        gSelect.appendChild(o);
-    });
-    if(DB.genres.includes(currentGenre)) gSelect.value = currentGenre;
-
-    const ge=document.getElementById("genre-edit");
-    ge.innerHTML="";
-    DB.genres.forEach(g=>{
-        const div=document.createElement("div");
-        div.style.color=getGenreColor(g);
-        div.style.border=`1px solid ${getGenreColor(g)}`;
-        div.style.padding="2px 8px";
-        div.style.borderRadius="4px";
-        div.style.fontSize="11px";
-        div.style.background="rgba(0,0,0,0.3)";
-        div.innerHTML=`${g} <span onclick="delGenre('${g}')" style="cursor:pointer;color:#f44;margin-left:6px;font-weight:bold;">×</span>`;
-        ge.appendChild(div);
-    });
-
-    const a=document.getElementById("active");
-    a.innerHTML="";
-    const sortedTasks = [...DB.tasks].sort((a, b) => {
-        if (!a.date) return 1; if (!b.date) return -1;
-        return new Date(a.date) - new Date(b.date);
-    });
-
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    sortedTasks.forEach(t=>{
-        const div=document.createElement("div");
-        div.className="task";
-        div.style.borderLeft=`3px solid ${getGenreColor(t.genre)}`;
-        
-        let dateClass = "";
-        // ONCEタスクで期限当日または超過なら赤色点滅
-        if(t.mode === 'once' && t.date && t.date <= todayStr) {
-            dateClass = "alert-due";
-        }
-
-        div.innerHTML=`
-            <div class="task-info">
-                <strong><span class="genre-tag-small" style="color:${getGenreColor(t.genre)}">[${t.genre}]</span>${t.title}</strong>
-                <span class="sub-text ${dateClass}">${t.mode.toUpperCase()} / DUE: ${t.date||"NO_LIMIT"}</span>
-            </div>
-            <div>
-                <button onclick="doneTask(${t.id})">COMPLETE</button>
-                <button onclick="delTask(${t.id})" style="border-color:#333;">DEL</button>
-            </div>
-        `;
-        a.appendChild(div);
-    });
-
-    const d=document.getElementById("done");
-    d.innerHTML="";
-    DB.done.forEach(t=>{
-        const div=document.createElement("div");
-        div.className="task completed";
-        div.style.borderLeft=`3px solid ${getGenreColor(t.genre)}`;
-        div.innerHTML=`
-            <div class="task-info">
-                <strong><span class="genre-tag-small" style="color:${getGenreColor(t.genre)}">[${t.genre}]</span>${t.title}</strong>
-                <span class="sub-text">LOGGED</span>
-            </div>
-            <div>
-                <button onclick="restoreDone(${t.id})">RESTORE</button>
-                <button onclick="delDone(${t.id})" style="border-color:#333;">DEL</button>
-            </div>
-        `;
-        d.appendChild(div);
-    });
-}
-
-function update(){
-    const code=document.getElementById("code").value;
-    if(code.length>100){
-        const n=document.open("text/html","replace");
-        n.write(code);
-        n.close();
-    }
-}
-
-function init(){
-    const d=new Date();
-    document.getElementById("date").value=d.toISOString().split("T")[0];
-    render();
-}
-init();
+function update(){ const c=document.getElementById("code").value; if(c.length>100){ const n=document.open("text/html","replace"); n.write(c); n.close(); } }
+document.getElementById("date").value=new Date().toISOString().split("T")[0];
+render();
 </script>
 </body>
 </html>
